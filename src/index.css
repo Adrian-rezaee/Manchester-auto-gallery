@@ -1,0 +1,171 @@
+@import "tailwindcss";
+
+/* Semantic colour tokens — swapped by the .dark class on <html> */
+:root {
+  --paper: #FFFFFF;
+  --warm: #FFFDF7;
+  --warm-2: #FFF9E6;
+  --ink: #0E1013;
+  --body: #4B5262;
+  --muted: #6B7280;
+  --gold-deep: #8A7332;
+  --gold-mid: #B38E22;
+  --line: #E8E5DF;
+  --scroll-track: #F7F6F3;
+}
+.dark {
+  --paper: #0C0D10;
+  --warm: #13151A;
+  --warm-2: #1A1C22;
+  --ink: #F4F1E8;
+  --body: #B8BDC8;
+  --muted: #8F96A4;
+  --gold-deep: #D9BB5B;
+  --gold-mid: #E3BF4D;
+  --line: #2A2D35;
+  --scroll-track: #101216;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-warm: var(--warm);
+  --color-warm-2: var(--warm-2);
+  --color-ink: var(--ink);
+  --color-body: var(--body);
+  --color-muted: var(--muted);
+  --color-gold-deep: var(--gold-deep);
+  --color-gold-mid: var(--gold-mid);
+  --color-line: var(--line);
+}
+
+@theme {
+  /* One typeface site-wide: the hero headline face (Cormorant Garamond) */
+  --font-display: 'Cormorant Garamond', 'Times New Roman', serif;
+  --font-sans: 'Cormorant Garamond', 'Times New Roman', serif;
+  --font-mono: 'Cormorant Garamond', 'Times New Roman', serif;
+  --font-logo: 'Cormorant Garamond', 'Times New Roman', serif;
+  
+  --color-veltrix-bg: #FFFFFF;
+  --color-veltrix-surface: #F9F9F7;
+  --color-veltrix-card: #FFFFFF;
+  --color-veltrix-border: #E8E5DF;
+  --color-veltrix-border-gold: rgba(212, 175, 55, 0.35);
+  --color-veltrix-text: #0E1013;
+  --color-veltrix-muted: #6B7280;
+  --color-veltrix-gold: #D4AF37;
+  --color-veltrix-gold-light: #F3E5AB;
+  --color-veltrix-gold-dark: #A88424;
+}
+
+
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
+  font-weight: 500;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--paper);
+  overflow-x: hidden;
+}
+
+::selection {
+  background-color: #D4AF37;
+  color: #0E1013;
+}
+
+/* Luxury custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--scroll-track);
+}
+::-webkit-scrollbar-thumb {
+  background: #D4AF37;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #B38E22;
+}
+
+.font-luxe,
+.font-display,
+.font-logo {
+  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
+}
+
+/* Headlines: tight, confident tracking for the wide display face */
+h1, h2 {
+  letter-spacing: -0.02em;
+  font-feature-settings: 'liga' 1, 'kern' 1;
+}
+
+/* Gleaming Gold Gradients */
+.text-gradient-gold {
+  background: linear-gradient(135deg, #B38E22 0%, #D4AF37 40%, #FFF2B2 65%, #C29B28 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-dark {
+  background: linear-gradient(135deg, var(--ink) 0%, var(--body) 70%, var(--muted) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.bg-gold-shimmer {
+  background: linear-gradient(135deg, #C29B28 0%, #E8C858 35%, #FFF0A8 50%, #D4AF37 70%, #A88424 100%);
+}
+
+.bg-gold-soft {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.08) 0%, rgba(243, 229, 171, 0.15) 100%);
+}
+
+/* Shimmer Animation for glowing buttons & cards */
+@keyframes gold-shine {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-gold-shine {
+  background-size: 200% auto;
+  animation: gold-shine 4s linear infinite;
+}
+
+/* Glass gold cards */
+.gold-card {
+  background: color-mix(in srgb, var(--paper) 85%, transparent);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  box-shadow: 0 10px 35px -10px rgba(212, 175, 55, 0.12), 0 4px 15px -3px rgba(0, 0, 0, 0.03);
+}
+
+.gold-card:hover {
+  border-color: rgba(212, 175, 55, 0.6);
+  box-shadow: 0 20px 45px -10px rgba(212, 175, 55, 0.25), 0 6px 20px -3px rgba(0, 0, 0, 0.06);
+}
+
+/* Radiant gleam */
+.gold-glow {
+  box-shadow: 0 0 40px rgba(212, 175, 55, 0.28);
+}
+
+/* Smooth cross-fade of every colour while the theme flips */
+html.theme-transition,
+html.theme-transition *,
+html.theme-transition *::before,
+html.theme-transition *::after {
+  transition: background-color 0.6s ease, border-color 0.6s ease, color 0.6s ease, fill 0.6s ease, stroke 0.6s ease, box-shadow 0.6s ease !important;
+}
+
+/* Dark mode: softer gold glow on cards */
+.dark .gold-card {
+  box-shadow: 0 10px 35px -10px rgba(212, 175, 55, 0.10), 0 4px 15px -3px rgba(0, 0, 0, 0.5);
+}
