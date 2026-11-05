@@ -66,7 +66,7 @@ export const ShowroomExperience: React.FC<ShowroomExperienceProps> = ({ onBookTo
         {/* Hero Architectural Visual Showcase */}
         <div className="relative rounded-3xl overflow-hidden border border-[#D4AF37]/35 aspect-16/9 md:aspect-21/9 mb-12 shadow-[0_20px_60px_rgba(212,175,55,0.18)] group">
           <img decoding="async"
-            src="/images/white-showroom-gold.webp"
+            src={`${import.meta.env.BASE_URL}images/white-showroom-gold.webp`}
             alt="Manchester Auto Gallery Dubai DIFC White & Gold Private Showroom"
             className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-103"
             loading="lazy"

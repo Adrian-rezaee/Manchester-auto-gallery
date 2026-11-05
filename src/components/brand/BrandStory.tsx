@@ -34,7 +34,7 @@ export const BrandStory: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="relative rounded-3xl overflow-hidden border border-[#D4AF37]/30 aspect-4/5 group shadow-[0_15px_40px_rgba(212,175,55,0.12)]">
                 <img decoding="async"
-                  src="/images/white-cockpit-gold.webp"
+                  src={`${import.meta.env.BASE_URL}images/white-cockpit-gold.webp`}
                   alt="Manchester Auto Gallery Bespoke Ivory & Gold Cockpit Craftsmanship"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-106"
                   loading="lazy"
@@ -52,7 +52,7 @@ export const BrandStory: React.FC = () => {
 
               <div className="relative rounded-3xl overflow-hidden border border-[#D4AF37]/30 aspect-4/5 group shadow-[0_15px_40px_rgba(212,175,55,0.12)] sm:translate-y-8">
                 <img decoding="async"
-                  src="/images/white-aero-gold.webp"
+                  src={`${import.meta.env.BASE_URL}images/white-aero-gold.webp`}
                   alt="Manchester Auto Gallery Aerodynamic Sculpture in Pearl & Gold"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-106"
                   loading="lazy"

@@ -11,7 +11,7 @@ interface MarkProps {
 
 export const AutogalleryMark: React.FC<MarkProps> = ({ className }) => (
   <img
-    src="/images/logo.webp"
+    src={`${import.meta.env.BASE_URL}images/logo.webp`}
     alt="Manchester Auto Gallery"
     width={1046}
     height={443}

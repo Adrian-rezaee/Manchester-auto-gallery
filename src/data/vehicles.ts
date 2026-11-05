@@ -6,6 +6,8 @@
  * "---------" until verified by the client.
  */
 
+const BASE = import.meta.env.BASE_URL;
+
 export const HIDDEN = '------';
 
 /** Default price (in AED) shown for every vehicle until real prices are set. */
@@ -65,11 +67,11 @@ export const VEHICLES: Vehicle[] = [
     model: 'Chiron Pur Sport',
     year: 2024,
     category: 'Hypercar',
-    heroImage: '/images/white-hypercar-marble.webp',
+    heroImage: `${BASE}images/white-hypercar-marble.webp`,
     gallery: [
-      '/images/white-hypercar-marble.webp',
-      '/images/white-cockpit-gold.webp',
-      '/images/white-aero-gold.webp',
+      `${BASE}images/white-hypercar-marble.webp`,
+      `${BASE}images/white-cockpit-gold.webp`,
+      `${BASE}images/white-aero-gold.webp`,
     ],
     ...hidden,
   },
@@ -79,8 +81,8 @@ export const VEHICLES: Vehicle[] = [
     model: 'Jesko Attack',
     year: 2024,
     category: 'Hypercar',
-    heroImage: '/images/white-aero-gold.webp',
-    gallery: ['/images/white-aero-gold.webp', '/images/white-hypercar-marble.webp'],
+    heroImage: `${BASE}images/white-aero-gold.webp`,
+    gallery: [`${BASE}images/white-aero-gold.webp`, `${BASE}images/white-hypercar-marble.webp`],
     ...hidden,
   },
   {
@@ -89,8 +91,8 @@ export const VEHICLES: Vehicle[] = [
     model: 'Phantom Extended',
     year: 2024,
     category: 'Grand Tourer',
-    heroImage: '/images/white-showroom-gold.webp',
-    gallery: ['/images/white-showroom-gold.webp', '/images/white-cockpit-gold.webp'],
+    heroImage: `${BASE}images/white-showroom-gold.webp`,
+    gallery: [`${BASE}images/white-showroom-gold.webp`, `${BASE}images/white-cockpit-gold.webp`],
     ...hidden,
   },
   {
@@ -99,8 +101,8 @@ export const VEHICLES: Vehicle[] = [
     model: 'Utopia',
     year: 2024,
     category: 'Hypercar',
-    heroImage: '/images/white-hypercar-marble.webp',
-    gallery: ['/images/white-hypercar-marble.webp', '/images/white-cockpit-gold.webp'],
+    heroImage: `${BASE}images/white-hypercar-marble.webp`,
+    gallery: [`${BASE}images/white-hypercar-marble.webp`, `${BASE}images/white-cockpit-gold.webp`],
     ...hidden,
   },
   {
@@ -109,8 +111,8 @@ export const VEHICLES: Vehicle[] = [
     model: 'Daytona SP3',
     year: 2023,
     category: 'Track Icon',
-    heroImage: '/images/white-aero-gold.webp',
-    gallery: ['/images/white-aero-gold.webp', '/images/white-showroom-gold.webp'],
+    heroImage: `${BASE}images/white-aero-gold.webp`,
+    gallery: [`${BASE}images/white-aero-gold.webp`, `${BASE}images/white-showroom-gold.webp`],
     ...hidden,
   },
   {
@@ -119,8 +121,8 @@ export const VEHICLES: Vehicle[] = [
     model: '911 GT3 RS',
     year: 2024,
     category: 'Track Icon',
-    heroImage: '/images/white-hypercar-marble.webp',
-    gallery: ['/images/white-hypercar-marble.webp', '/images/white-cockpit-gold.webp'],
+    heroImage: `${BASE}images/white-hypercar-marble.webp`,
+    gallery: [`${BASE}images/white-hypercar-marble.webp`, `${BASE}images/white-cockpit-gold.webp`],
     ...hidden,
   },
 ];
