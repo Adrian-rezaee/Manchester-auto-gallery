@@ -2,16 +2,17 @@
 
 /* Semantic colour tokens — swapped by the .dark class on <html> */
 :root {
-  --paper: #FFFFFF;
-  --warm: #FFFDF7;
-  --warm-2: #FFF9E6;
+  /* Light mode: warm cream instead of stark white */
+  --paper: #FAF5EA;
+  --warm: #F4EDDC;
+  --warm-2: #EDE2C9;
   --ink: #0E1013;
-  --body: #4B5262;
-  --muted: #6B7280;
+  --body: #4F493F;
+  --muted: #756D5D;
   --gold-deep: #8A7332;
   --gold-mid: #B38E22;
-  --line: #E8E5DF;
-  --scroll-track: #F7F6F3;
+  --line: #E4D9BF;
+  --scroll-track: #F1EAD8;
 }
 .dark {
   --paper: #0C0D10;
@@ -45,10 +46,10 @@
   --font-mono: 'Cormorant Garamond', 'Times New Roman', serif;
   --font-logo: 'Cormorant Garamond', 'Times New Roman', serif;
   
-  --color-veltrix-bg: #FFFFFF;
-  --color-veltrix-surface: #F9F9F7;
-  --color-veltrix-card: #FFFFFF;
-  --color-veltrix-border: #E8E5DF;
+  --color-veltrix-bg: #FAF5EA;
+  --color-veltrix-surface: #F4EDDC;
+  --color-veltrix-card: #FAF5EA;
+  --color-veltrix-border: #E4D9BF;
   --color-veltrix-border-gold: rgba(212, 175, 55, 0.35);
   --color-veltrix-text: #0E1013;
   --color-veltrix-muted: #6B7280;
@@ -66,6 +67,16 @@ html {
   font-family: 'Cormorant Garamond', 'Times New Roman', serif;
   font-weight: 500;
   -webkit-font-smoothing: antialiased;
+  /* Cormorant's default figures are old-style (uneven, dropping below the line);
+     lining figures are even-height, like capitals */
+  font-variant-numeric: lining-nums;
+  font-feature-settings: 'lnum' 1, 'kern' 1;
+}
+
+/* prices, counters, phone numbers: even-width digits so they line up */
+.font-mono {
+  font-variant-numeric: lining-nums tabular-nums;
+  font-feature-settings: 'lnum' 1, 'tnum' 1;
 }
 
 body {
@@ -104,7 +115,7 @@ body {
 /* Headlines: tight, confident tracking for the wide display face */
 h1, h2 {
   letter-spacing: -0.02em;
-  font-feature-settings: 'liga' 1, 'kern' 1;
+  font-feature-settings: 'liga' 1, 'kern' 1, 'lnum' 1;
 }
 
 /* Gleaming Gold Gradients */
@@ -168,4 +179,107 @@ html.theme-transition *::after {
 /* Dark mode: softer gold glow on cards */
 .dark .gold-card {
   box-shadow: 0 10px 35px -10px rgba(212, 175, 55, 0.10), 0 4px 15px -3px rgba(0, 0, 0, 0.5);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Hero car-swap effect: golden light streak + cinema bars + title    */
+/*  --d is +1 for "next car" (streak runs right → left) or -1 for prev */
+/* ------------------------------------------------------------------ */
+.car-swap-fx {
+  position: absolute;
+  inset: 0;
+  z-index: 25;
+  pointer-events: none;
+  overflow: hidden;
+}
+.car-swap-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(8, 9, 11, 0) 25%, rgba(8, 9, 11, 0.78) 100%);
+  opacity: 0;
+  animation: carSwapVignette 1.7s ease-in-out both;
+}
+.car-swap-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 11%;
+  background: #050607;
+  transform: scaleY(0);
+  animation: carSwapBar 1.7s cubic-bezier(0.7, 0, 0.2, 1) both;
+}
+.car-swap-bar-top { top: 0; transform-origin: top; }
+.car-swap-bar-bottom { bottom: 0; transform-origin: bottom; }
+.car-swap-streak {
+  position: absolute;
+  top: -10%;
+  left: 50%;
+  width: 34%;
+  height: 120%;
+  margin-left: -17%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 240, 168, 0) 0%,
+    rgba(232, 200, 88, 0.35) 35%,
+    rgba(255, 255, 255, 0.95) 50%,
+    rgba(232, 200, 88, 0.35) 65%,
+    rgba(255, 240, 168, 0) 100%
+  );
+  mix-blend-mode: screen;
+  filter: blur(7px);
+  opacity: 0;
+  animation: carSwapStreak 1.05s cubic-bezier(0.65, 0, 0.25, 1) 0.2s both;
+}
+.car-swap-streak-thin {
+  width: 6%;
+  margin-left: -3%;
+  filter: blur(2px);
+  animation-delay: 0.28s;
+  animation-duration: 0.95s;
+}
+.car-swap-title {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  animation: carSwapTitle 1.5s ease-out 0.45s both;
+}
+.car-swap-title span {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.6rem, 5vw, 3.6rem);
+  text-transform: uppercase;
+  color: #f6e7b4;
+  text-shadow: 0 0 28px rgba(232, 200, 88, 0.65), 0 2px 18px rgba(0, 0, 0, 0.8);
+  white-space: nowrap;
+}
+
+@keyframes carSwapStreak {
+  0%   { transform: skewX(-18deg) translateX(calc(var(--d) * 85vw)); opacity: 0; }
+  15%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { transform: skewX(-18deg) translateX(calc(var(--d) * -85vw)); opacity: 0; }
+}
+@keyframes carSwapVignette {
+  0%   { opacity: 0; }
+  35%  { opacity: 1; }
+  70%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes carSwapBar {
+  0%   { transform: scaleY(0); }
+  30%  { transform: scaleY(1); }
+  75%  { transform: scaleY(1); }
+  100% { transform: scaleY(0); }
+}
+@keyframes carSwapTitle {
+  0%   { opacity: 0; letter-spacing: 0.7em; transform: scale(1.08); }
+  35%  { opacity: 1; }
+  70%  { opacity: 1; }
+  100% { opacity: 0; letter-spacing: 0.22em; transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .car-swap-streak, .car-swap-title { animation-duration: 0.01ms; animation-delay: 0s; }
 }

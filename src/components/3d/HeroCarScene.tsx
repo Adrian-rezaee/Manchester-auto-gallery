@@ -2,15 +2,22 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { Reflector } from 'three/examples/jsm/objects/Reflector.js';
-import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { ChevronLeft, ChevronRight, Lightbulb, MousePointerClick } from 'lucide-react';
 import { PAINT_COLORS, PaintColorKey } from './paints';
-import { HERO_VIEWS } from './stages';
+import { HERO_VIEWS, CAR_LABEL, CAR_ORDER, CAR_FIRST_INDEX, CAR_VIEW_COUNT, CarKey } from './stages';
 import { BuiltVehicle, createVehicleMaterials } from './vehicleBuilders';
 import { loadLandCruiser } from './loadLandCruiser';
-import { createCarLights, CarLights } from './carLights';
-import { createRearPlate, RearPlate } from './rearPlate';
+import { loadMaybach } from './loadMaybach';
+import {
+  createCarLights,
+  CarLights,
+  CarLightLayout,
+  LAND_CRUISER_LIGHTS,
+  MAYBACH_LIGHTS,
+} from './carLights';
+import { createRearPlate, RearPlate, MAYBACH_PLATE } from './rearPlate';
 import { createEngineSound, EngineSound } from './engineAudio';
+import { createShowroomBackdrop, ROOM_W, ROOM_D, ROOM_CZ } from './showroomBackdrop';
 import { useTheme } from '../../theme/ThemeContext';
 
 const UP = new THREE.Vector3(0, 1, 0);
@@ -27,6 +34,9 @@ export const HeroCarScene: React.FC = () => {
   // shared with the page theme: lights on = whole site goes dark, lights off = back to light
   const { lightsOn, setLightsOn } = useTheme();
   const [showHint, setShowHint] = useState(true);
+  // car-to-car transition overlay (golden light sweep + cinema bars + car name)
+  const [sweep, setSweep] = useState<{ key: number; dir: 1 | -1; car: CarKey } | null>(null);
+  const [switching, setSwitching] = useState(false);
 
   // Mutable refs
   const viewIndexRef = useRef(0);
@@ -42,23 +52,36 @@ export const HeroCarScene: React.FC = () => {
   const pointerRef = useRef({ down: false, moved: false, startX: 0, startY: 0, lastX: 0, startTime: 0 });
   const engineRef = useRef<EngineSound | null>(null);
   const lightsOnRef = useRef(false);
+  // set by the three.js effect: lets the slider ask for a car swap / an early download of the Maybach
+  const carControlRef = useRef<{ switchCar: (dir: 1 | -1) => void; preload: () => void } | null>(null);
 
   useEffect(() => {
     lightsOnRef.current = lightsOn;
   }, [lightsOn]);
 
-  // Lights button: switches the studio to near-blackout, brings the car's lights up,
-  // and plays the Land Cruiser start-up (then a quiet idle). Off = engine shuts down.
+  // Lights button: just flips the shared theme (lights on = dark mode, off = light mode)
   const toggleLights = useCallback(() => {
-    const next = !lightsOnRef.current;
-    lightsOnRef.current = next;
-    setLightsOn(next);
-    if (next) {
-      engineRef.current?.start();
-    } else {
-      engineRef.current?.stop();
-    }
+    setLightsOn(!lightsOnRef.current);
   }, [setLightsOn]);
+
+  // Whatever flips the theme — this button OR the header dark-mode switch — the engine follows:
+  // on = the start-up sound of the car on screen (Land Cruiser or Maybach), off = engine shuts down.
+  // While it is dark, sliding over to the other car starts that car's own start-up sound.
+  const activeCar = HERO_VIEWS[viewIndex].car;
+  const prevLightsRef = useRef(lightsOn);
+  const prevCarRef = useRef<CarKey>(activeCar);
+  useEffect(() => {
+    const lightsChanged = prevLightsRef.current !== lightsOn;
+    const carChanged = prevCarRef.current !== activeCar;
+    prevLightsRef.current = lightsOn;
+    prevCarRef.current = activeCar;
+    if (lightsChanged) {
+      if (lightsOn) engineRef.current?.start(activeCar);
+      else engineRef.current?.stop();
+    } else if (carChanged && lightsOn) {
+      engineRef.current?.start(activeCar);
+    }
+  }, [lightsOn, activeCar]);
 
   // the engine recording is fetched + decoded up front so the click plays instantly
   useEffect(() => {
@@ -111,19 +134,28 @@ export const HeroCarScene: React.FC = () => {
 
   const goTo = useCallback(
     (idx: number) => {
-      const total = HERO_VIEWS.length;
-      const next = ((idx % total) + total) % total;
+      // screen clicks only walk the camera angles of the car on show — they never change the car
+      const car = HERO_VIEWS[viewIndexRef.current].car;
+      const first = CAR_FIRST_INDEX[car];
+      const n = CAR_VIEW_COUNT[car];
+      const next = first + ((((idx - first) % n) + n) % n);
       setShowHint(false);
       applyView(next);
     },
     [applyView]
   );
 
+  // slider arrows: switch from one car to the other (animated)
+  const switchCar = useCallback((dir: 1 | -1) => {
+    setShowHint(false);
+    carControlRef.current?.switchCar(dir);
+  }, []);
+
   const goNext = useCallback(() => goTo(viewIndexRef.current + 1), [goTo]);
   const goPrev = useCallback(() => goTo(viewIndexRef.current - 1), [goTo]);
 
   /* ---------------------------------------------------------------- */
-  /*  Three.js — dark marble studio with vertical light strips          */
+  /*  Three.js — glass-front Manchester Auto Gallery showroom          */
   /* ---------------------------------------------------------------- */
 
   useEffect(() => {
@@ -148,10 +180,22 @@ export const HeroCarScene: React.FC = () => {
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    // Shadows only change when the car turns (or finishes loading), so the depth pass is
+    // re-run on demand instead of every frame. Same shadows, a whole render pass saved.
+    renderer.shadowMap.autoUpdate = false;
+    renderer.shadowMap.needsUpdate = true;
+    let lastShadowYaw = Number.NaN;
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0a0b0d);
-    scene.fog = new THREE.Fog(0x0a0b0d, 22, 58);
+
+    // Glass-front Manchester Auto Gallery showroom (golden hour outside, night with lights on)
+    const backdrop = createShowroomBackdrop({
+      isMobile,
+      maxAnisotropy: Math.min(renderer.capabilities.getMaxAnisotropy(), 8),
+    });
+    scene.add(backdrop.group);
+    scene.background = new THREE.Color().copy(backdrop.horizon);
+    scene.fog = new THREE.Fog(backdrop.horizon.getHex(), 70, 330);
 
     const pmrem = new THREE.PMREMGenerator(renderer);
     const envTexture = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
@@ -163,7 +207,7 @@ export const HeroCarScene: React.FC = () => {
       36,
       container.clientWidth / container.clientHeight,
       0.1,
-      120
+      500
     );
     camera.position.copy(baseCamPosRef.current);
 
@@ -172,18 +216,26 @@ export const HeroCarScene: React.FC = () => {
     // expensive part: smaller texture on desktop, skipped entirely on mobile.
     let reflector: Reflector | null = null;
     if (!isMobile) {
-      reflector = new Reflector(new THREE.PlaneGeometry(70, 70), {
+      reflector = new Reflector(new THREE.PlaneGeometry(ROOM_W, ROOM_D), {
         clipBias: 0.003,
         textureWidth: 512,
         textureHeight: 512,
         color: 0x4a4a4a,
       });
       reflector.rotation.x = -Math.PI / 2;
+      reflector.position.z = ROOM_CZ;
+      // The mirror re-draws the whole room, so it refreshes every other frame; the floor keeps
+      // the previous reflection in between (a 1/60 s lag, not visible).
+      const mirrorRender = reflector.onBeforeRender.bind(reflector);
+      let mirrorTick = 0;
+      reflector.onBeforeRender = (...args: Parameters<typeof mirrorRender>) => {
+        if ((mirrorTick++ & 1) === 0) mirrorRender(...args);
+      };
       scene.add(reflector);
     }
 
     const marble = new THREE.Mesh(
-      new THREE.PlaneGeometry(70, 70),
+      new THREE.PlaneGeometry(ROOM_W, ROOM_D),
       new THREE.MeshPhysicalMaterial({
         color: 0x15171b,
         roughness: 0.42,
@@ -194,56 +246,13 @@ export const HeroCarScene: React.FC = () => {
       })
     );
     marble.rotation.x = -Math.PI / 2;
-    marble.position.y = 0.002;
+    marble.position.set(0, 0.002, ROOM_CZ);
     marble.receiveShadow = true;
     marble.renderOrder = 1;
     scene.add(marble);
 
-    // --- Dark studio walls with vertical warm light strips ---
-    const wallMat = new THREE.MeshStandardMaterial({ color: 0x121418, roughness: 0.92, metalness: 0.08 });
-    const stripMat = new THREE.MeshBasicMaterial({ color: 0xfff2d8 });
-    const glowMat = new THREE.MeshBasicMaterial({
-      color: 0xffd9a0,
-      transparent: true,
-      opacity: 0.11,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-    });
-
-    // All wall pieces are baked into 3 merged meshes (was ~80 separate draw calls,
-    // each drawn twice because of the floor reflection).
-    const wallGeos: THREE.BufferGeometry[] = [];
-    const stripGeos: THREE.BufferGeometry[] = [];
-    const glowGeos: THREE.BufferGeometry[] = [];
-    const buildWall = (cx: number, cz: number, rotY: number) => {
-      const wallM = new THREE.Matrix4().compose(
-        new THREE.Vector3(cx, 0, cz),
-        new THREE.Quaternion().setFromEuler(new THREE.Euler(0, rotY, 0)),
-        new THREE.Vector3(1, 1, 1)
-      );
-      const place = (geo: THREE.BufferGeometry, x: number, y: number, z: number, list: THREE.BufferGeometry[]) => {
-        geo.applyMatrix4(wallM.clone().multiply(new THREE.Matrix4().makeTranslation(x, y, z)));
-        list.push(geo);
-      };
-      place(new THREE.PlaneGeometry(34, 13), 0, 6.5, 0, wallGeos);
-      place(new THREE.BoxGeometry(34, 0.35, 0.14), 0, 0.18, 0.05, wallGeos);
-      for (let i = -4; i <= 4; i++) {
-        place(new THREE.BoxGeometry(0.075, 7.6, 0.06), i * 3.3, 3.9, 0.06, stripGeos);
-        place(new THREE.PlaneGeometry(0.62, 8.1), i * 3.3, 3.9, 0.1, glowGeos);
-      }
-    };
-    buildWall(0, -11, 0);
-    buildWall(0, 12, Math.PI);
-    buildWall(-11.5, 0, Math.PI / 2);
-    buildWall(11.5, 0, -Math.PI / 2);
-    const wallMesh = new THREE.Mesh(mergeGeometries(wallGeos)!, wallMat);
-    const stripMesh = new THREE.Mesh(mergeGeometries(stripGeos)!, stripMat);
-    const glowMesh = new THREE.Mesh(mergeGeometries(glowGeos)!, glowMat);
-    scene.add(wallMesh, stripMesh, glowMesh);
-    wallGeos.concat(stripGeos, glowGeos).forEach((g) => g.dispose());
-
     // --- Lighting ---
-    const hemi = new THREE.HemisphereLight(0xb9c6d8, 0x0a0b0d, 0.32);
+    const hemi = new THREE.HemisphereLight(0xf0d4aa, 0x15171b, 0.36);
     scene.add(hemi);
 
     const key = new THREE.DirectionalLight(0xffffff, 1.25);
@@ -289,20 +298,105 @@ export const HeroCarScene: React.FC = () => {
     // Load the Land Cruiser GLB (+ the lights-on effect)
     let disposed = false;
     let lightFx = null as CarLights | null;
-    let rearPlate = null as RearPlate | null;
+    const viewerPos = new THREE.Vector3();
     let lightLevel = 0;
     let boost = 0.35; // engine-loudness drive of the car lights (smoothed)
     let fxOn = false;
-    loadLandCruiser(mats, Math.min(renderer.capabilities.getMaxAnisotropy(), 8))
+    const aniso = Math.min(renderer.capabilities.getMaxAnisotropy(), 8);
+    // One entry per car. The cars share a single set of headlight/tail lights (the light count
+    // never changes, so no shader recompiles) which are moved onto whichever car is showing.
+    interface CarEntry {
+      root: THREE.Group;
+      lamp: THREE.MeshStandardMaterial | null;
+      lampRed: THREE.MeshStandardMaterial[];
+      layout: CarLightLayout;
+      plate: RearPlate;
+    }
+    const carEntries: Partial<Record<CarKey, CarEntry>> = {};
+    let wantedCar: CarKey = HERO_VIEWS[viewIndexRef.current].car;
+    let shownCar: CarKey | null = null;
+    const syncCar = () => {
+      const entry = carEntries[wantedCar];
+      if (!entry || !lightFx || shownCar === wantedCar) return;
+      (Object.keys(carEntries) as CarKey[]).forEach((k) => {
+        carEntries[k]!.root.visible = k === wantedCar;
+      });
+      lightFx.setCar({ lamp: entry.lamp, lampRed: entry.lampRed }, entry.layout);
+      // the cars parked around the hero car change model together with it
+      backdrop.showDisplayCars(wantedCar);
+      shownCar = wantedCar;
+      renderer.shadowMap.needsUpdate = true;
+    };
+
+    let maybachRequested = false;
+    const requestMaybach = () => {
+      if (maybachRequested) return;
+      maybachRequested = true;
+      loadMaybach(mats, aniso)
+        .then(({ model, lamp, lampRed, paint }) => {
+          if (disposed) return;
+          const root = new THREE.Group();
+          root.name = 'MaybachRoot';
+          root.add(model);
+          // Maybachs parked along the glass too (shown only while the Maybach is the hero car)
+          if (!isMobile) backdrop.addDisplayCars('maybach', model, paint);
+          const plate = createRearPlate(aniso, MAYBACH_PLATE);
+          root.add(plate.group);
+          vehicle.group.add(root);
+          carEntries.maybach = { root, lamp, lampRed, layout: MAYBACH_LIGHTS, plate };
+          // compile its shaders now (while hidden from view) so the swap does not hitch
+          root.visible = true;
+          renderer.compileAsync(scene, camera).catch(() => undefined);
+          root.visible = false;
+          syncCar();
+        })
+        .catch((err) => {
+          maybachRequested = false;
+          console.error('Maybach GLB load failed', err);
+        });
+    };
+
+    // ---- car-to-car transition: the old car drives out, the new one sweeps in with a spin ----
+    const SLIDE = 17;
+    const trans = { phase: 'idle' as 'idle' | 'out' | 'in', t: 0, dir: 1 as 1 | -1, next: wantedCar };
+    let swapCounter = 0;
+    let fovPunch = 0;
+    carControlRef.current = {
+      switchCar: (dir: 1 | -1) => {
+        if (trans.phase !== 'idle') return;
+        const i = CAR_ORDER.indexOf(wantedCar);
+        const next = CAR_ORDER[(i + dir + CAR_ORDER.length) % CAR_ORDER.length];
+        trans.phase = 'out';
+        trans.t = 0;
+        trans.dir = dir;
+        trans.next = next;
+        if (next === 'maybach') requestMaybach();
+        setSwitching(true);
+        setSweep({ key: ++swapCounter, dir, car: next });
+      },
+      preload: requestMaybach,
+    };
+    // fetch the Maybach quietly in the background so the first swap is instant
+    const preloadTimer = window.setTimeout(requestMaybach, 2500);
+
+    loadLandCruiser(mats, aniso)
       .then(({ model, lamp, lampRed }) => {
         if (disposed) return;
-        vehicle.group.add(model);
-        lightFx = createCarLights(lamp, lampRed);
+        const root = new THREE.Group();
+        root.name = 'LandCruiserRoot';
+        root.add(model);
+        // other cars parked along the glass, like the real showroom (desktop only)
+        if (!isMobile) backdrop.addDisplayCars('landcruiser', model, mats.body);
+        renderer.shadowMap.needsUpdate = true;
+        lightFx = createCarLights(lamp, lampRed, LAND_CRUISER_LIGHTS);
         lightFx.setLevel(0);
-        vehicle.group.add(lightFx.group);
+        vehicle.group.add(root, lightFx.group);
         // number plate on the tailgate, carrying the brand logo
-        rearPlate = createRearPlate(Math.min(renderer.capabilities.getMaxAnisotropy(), 8));
-        vehicle.group.add(rearPlate.group);
+        const plate = createRearPlate(aniso);
+        root.add(plate.group);
+        carEntries.landcruiser = { root, lamp, lampRed: lampRed ? [lampRed] : [], layout: LAND_CRUISER_LIGHTS, plate };
+        syncCar();
+        if (wantedCar === 'maybach') requestMaybach();
       })
       .catch((err) => console.error('GLB load failed', err));
 
@@ -335,9 +429,6 @@ export const HeroCarScene: React.FC = () => {
     // room, so on desktop it has to be dimmed too). Only a faint rim stays so the car's
     // silhouette is readable; the headlamp beams do the rest.
     const mix = (a: number, b: number, t: number) => a + (b - a) * t;
-    const stripBase = new THREE.Color(0xfff2d8);
-    const bgDay = new THREE.Color(0x0a0b0d);
-    const bgNight = new THREE.Color(0x010102);
     const reflectorDay = new THREE.Color(0x4a4a4a);
     const reflectorColor = reflector
       ? ((reflector.material as THREE.ShaderMaterial).uniforms.color.value as THREE.Color)
@@ -353,12 +444,11 @@ export const HeroCarScene: React.FC = () => {
       hemi.intensity = mix(0.32, 0.015, l);
       wallGlowA.intensity = wallGlowB.intensity = mix(55, 0, l);
       scene.environmentIntensity = mix(0.55, 0.045, l);
-      stripMat.color.copy(stripBase).multiplyScalar(mix(1, 0.015, l));
-      glowMat.opacity = mix(0.11, 0, l);
+      backdrop.setMood(l); // golden hour → night, the gold sign keeps glowing
       marbleMat.envMapIntensity = mix(0.35, 0.03, l);
       particleMat.opacity = mix(0.5, 0.06, l);
-      bg.copy(bgDay).lerp(bgNight, l);
-      fog.color.copy(bg);
+      bg.copy(backdrop.horizon);
+      fog.color.copy(backdrop.horizon);
       reflectorColor?.copy(reflectorDay).multiplyScalar(mix(1, 0.12, l));
     };
 
@@ -400,8 +490,43 @@ export const HeroCarScene: React.FC = () => {
       camera.position.lerp(targetCamPosRef.current, k);
       currentLookAtRef.current.lerp(targetLookAtRef.current, k);
       camera.lookAt(currentLookAtRef.current);
-      if (Math.abs(camera.fov - baseFovRef.current) > 0.01) {
-        camera.fov += (baseFovRef.current - camera.fov) * k;
+      // car swap animation: old car accelerates out, new car decelerates in while spinning
+      if (trans.phase !== 'idle') {
+        const group = vehicle.group;
+        if (trans.phase === 'out') {
+          trans.t = Math.min(1, trans.t + dt / 0.55);
+          group.position.x = -trans.dir * SLIDE * trans.t * trans.t * trans.t;
+          fovPunch = 9 * Math.sin(trans.t * Math.PI * 0.5);
+          if (trans.t >= 1 && carEntries[trans.next]) {
+            // swap models while the car is off-screen (waits here if the Maybach is still downloading)
+            wantedCar = trans.next;
+            syncCar();
+            applyView(CAR_FIRST_INDEX[wantedCar]);
+            yawRef.current.current = trans.dir * 1.2;
+            yawRef.current.target = 0;
+            yawRef.current.free = false;
+            yawRef.current.velocity = 0;
+            group.position.x = trans.dir * SLIDE;
+            trans.phase = 'in';
+            trans.t = 0;
+          }
+        } else {
+          trans.t = Math.min(1, trans.t + dt / 1.15);
+          const e = 1 - Math.pow(1 - trans.t, 4);
+          group.position.x = trans.dir * SLIDE * (1 - e);
+          fovPunch = 9 * (1 - e);
+          if (trans.t >= 1) {
+            group.position.x = 0;
+            fovPunch = 0;
+            trans.phase = 'idle';
+            setSwitching(false);
+          }
+        }
+        renderer.shadowMap.needsUpdate = true;
+      }
+      const fovTarget = baseFovRef.current + fovPunch;
+      if (Math.abs(camera.fov - fovTarget) > 0.01) {
+        camera.fov += (fovTarget - camera.fov) * Math.max(k, 0.12);
         camera.updateProjectionMatrix();
       }
 
@@ -416,6 +541,10 @@ export const HeroCarScene: React.FC = () => {
         }
       }
       vehicle.group.rotation.y = yaw.current;
+      if (yaw.current !== lastShadowYaw) {
+        lastShadowYaw = yaw.current;
+        renderer.shadowMap.needsUpdate = true;
+      }
 
       // lights button: fade the lamp glow in / out
       const targetLevel = lightsOnRef.current ? 1 : 0;
@@ -433,6 +562,7 @@ export const HeroCarScene: React.FC = () => {
         const target = engineRef.current ? engineRef.current.getLoudness() : 0.35;
         boost += (target - boost) * (1 - Math.exp(-dt * 16));
         lightFx?.setLevel(c * c * (3 - 2 * c), boost);
+        lightFx?.setViewer(vehicle.group.worldToLocal(viewerPos.copy(camera.position)));
         fxOn = lightLevel > 0;
       }
 
@@ -478,12 +608,15 @@ export const HeroCarScene: React.FC = () => {
 
     return () => {
       disposed = true;
+      window.clearTimeout(preloadTimer);
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(raf);
       observer.disconnect();
       lightFx?.dispose();
-      rearPlate?.dispose();
+      carControlRef.current = null;
+      (Object.keys(carEntries) as CarKey[]).forEach((k) => carEntries[k]!.plate.dispose());
       reflector?.dispose();
+      backdrop.dispose();
       envTexture.dispose();
       renderer.dispose();
     };
@@ -609,31 +742,53 @@ export const HeroCarScene: React.FC = () => {
       <div className="absolute inset-x-0 bottom-0 h-40 pointer-events-none bg-gradient-to-t from-[#08090B] via-[#08090B]/45 to-transparent" />
       <div className="absolute inset-x-0 top-0 h-16 lg:h-36 pointer-events-none bg-gradient-to-b from-[#08090B]/90 via-[#08090B]/35 to-transparent" />
 
-      {/* Slider edge affordances */}
-      <div
-        className={`absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 pointer-events-none hidden sm:flex items-center gap-2 transition-all duration-300 ${
-          hoverSide === 'left' && !isDragging ? 'opacity-100 -translate-x-0' : 'opacity-0 -translate-x-2'
-        }`}
+      {/* Slider arrows — these switch from car to car (with the animated swap).
+          Clicking anywhere else on the left / right of the stage only changes the camera angle. */}
+      <button
+        type="button"
+        onClick={() => switchCar(-1)}
+        disabled={switching}
+        aria-label="Previous car"
+        title="Previous car"
+        className="absolute left-3 md:left-7 top-1/2 -translate-y-1/2 z-30 group flex items-center gap-2 disabled:opacity-40 disabled:pointer-events-none"
+        {...stopPointer}
       >
-        <div className="w-11 h-11 rounded-full border border-[#D4AF37]/60 bg-black/35 backdrop-blur-md flex items-center justify-center">
-          <ChevronLeft className="w-5 h-5 text-[#E8C858]" />
-        </div>
-        <span className="text-[9px] font-mono tracking-[0.28em] uppercase text-[#E8C858]/80 font-bold">
-          Prev
+        <span className="w-11 h-11 md:w-12 md:h-12 rounded-full border border-[#D4AF37]/60 bg-black/45 backdrop-blur-md flex items-center justify-center transition-all duration-300 group-hover:bg-[#D4AF37] group-hover:border-[#D4AF37] group-hover:scale-110 shadow-[0_0_18px_rgba(212,175,55,0.25)]">
+          <ChevronLeft className="w-5 h-5 text-[#E8C858] group-hover:text-[#0E1013] transition-colors" />
         </span>
-      </div>
-      <div
-        className={`absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 pointer-events-none hidden sm:flex items-center gap-2 transition-all duration-300 ${
-          hoverSide === 'right' && !isDragging ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-2'
-        }`}
+      </button>
+      <button
+        type="button"
+        onClick={() => switchCar(1)}
+        disabled={switching}
+        aria-label="Next car"
+        title="Next car"
+        className="absolute right-3 md:right-7 top-1/2 -translate-y-1/2 z-30 group flex items-center gap-2 disabled:opacity-40 disabled:pointer-events-none"
+        {...stopPointer}
       >
-        <span className="text-[9px] font-mono tracking-[0.28em] uppercase text-[#E8C858]/80 font-bold">
-          Next
+        <span className="w-11 h-11 md:w-12 md:h-12 rounded-full border border-[#D4AF37]/60 bg-black/45 backdrop-blur-md flex items-center justify-center transition-all duration-300 group-hover:bg-[#D4AF37] group-hover:border-[#D4AF37] group-hover:scale-110 shadow-[0_0_18px_rgba(212,175,55,0.25)]">
+          <ChevronRight className="w-5 h-5 text-[#E8C858] group-hover:text-[#0E1013] transition-colors" />
         </span>
-        <div className="w-11 h-11 rounded-full border border-[#D4AF37]/60 bg-black/35 backdrop-blur-md flex items-center justify-center">
-          <ChevronRight className="w-5 h-5 text-[#E8C858]" />
+      </button>
+
+      {/* Car-swap effect: golden light streak, cinema bars and the new car's name */}
+      {sweep && (
+        <div
+          key={sweep.key}
+          className="car-swap-fx"
+          style={{ ['--d' as string]: sweep.dir } as React.CSSProperties}
+          aria-hidden
+        >
+          <div className="car-swap-vignette" />
+          <div className="car-swap-bar car-swap-bar-top" />
+          <div className="car-swap-bar car-swap-bar-bottom" />
+          <div className="car-swap-streak" />
+          <div className="car-swap-streak car-swap-streak-thin" />
+          <div className="car-swap-title">
+            <span>{CAR_LABEL[sweep.car]}</span>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Cursor follower (desktop) */}
       <div
@@ -648,7 +803,7 @@ export const HeroCarScene: React.FC = () => {
           }`}
         >
           {hoverSide === 'left' && <ChevronLeft className="w-3.5 h-3.5 text-[#E8C858]" />}
-          <span>{hoverSide === 'right' ? 'Next View' : 'Previous View'}</span>
+          <span>{hoverSide === 'right' ? 'Next Angle' : 'Previous Angle'}</span>
           {hoverSide === 'right' && <ChevronRight className="w-3.5 h-3.5 text-[#E8C858]" />}
         </div>
       </div>
@@ -661,7 +816,7 @@ export const HeroCarScene: React.FC = () => {
       >
         <MousePointerClick className="w-4 h-4 text-[#E8C858]" />
         <span className="text-[10px] font-mono tracking-[0.22em] uppercase text-[#E8C858]/90 font-bold">
-          Click left / right to walk the 13 studio views
+          Click left / right for camera angles · arrows switch cars
         </span>
       </div>
 
@@ -688,9 +843,11 @@ export const HeroCarScene: React.FC = () => {
 
         <div className="flex items-center gap-2 sm:gap-2.5 text-[9px] sm:text-[10px] font-mono tracking-[0.2em] sm:tracking-[0.28em] uppercase whitespace-nowrap">
           <span className="text-[#E8C858] font-bold whitespace-nowrap">
-            {pad(viewIndex + 1)} / {pad(HERO_VIEWS.length)}
+            {pad(viewIndex - CAR_FIRST_INDEX[view.car] + 1)} / {pad(CAR_VIEW_COUNT[view.car])}
           </span>
           <span className="w-px h-3 bg-white/25" />
+          <span className="text-white/45 whitespace-nowrap hidden sm:inline">{CAR_LABEL[view.car]}</span>
+          <span className="w-px h-3 bg-white/25 hidden sm:block" />
           <span className="text-white/70 font-semibold whitespace-nowrap">{view.name}</span>
         </div>
       </div>

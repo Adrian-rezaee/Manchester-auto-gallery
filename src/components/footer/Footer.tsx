@@ -29,13 +29,11 @@ export const Footer: React.FC<FooterProps> = ({ onOpenBooking }) => {
             {/* Direct WhatsApp Concierge Button in Gold / Green Accent */}
             <div className="pt-2">
               <a
-                href="https://wa.me/97148889900"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="#contact"
                 className="inline-flex items-center gap-2.5 px-5 py-3 rounded-xl bg-warm hover:bg-paper border-2 border-[#D4AF37]/40 hover:border-[#D4AF37] text-ink text-xs font-mono font-bold uppercase tracking-wider shadow-sm hover:shadow-md transition-all duration-300"
               >
                 <MessageCircle className="w-4 h-4 text-[#25D366]" />
-                <span>Direct WhatsApp Concierge (+971 4 888 9900)</span>
+                <span>Direct WhatsApp Concierge (-----)</span>
                 <ArrowUpRight className="w-3.5 h-3.5 text-gold-mid" />
               </a>
             </div>
@@ -88,18 +86,18 @@ export const Footer: React.FC<FooterProps> = ({ onOpenBooking }) => {
               <div className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-gold-mid shrink-0 mt-0.5" />
                 <span className="text-ink font-medium leading-relaxed">
-                  Gate Precinct 4, Level 01, Dubai International Financial Centre (DIFC), Dubai, United Arab Emirates
+                  -----
                 </span>
               </div>
 
               <div className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-gold-deep shrink-0" />
-                <span className="text-ink font-semibold">+971 4 888 9900</span>
+                <span className="text-ink font-semibold">-----</span>
               </div>
 
               <div className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-gold-deep shrink-0" />
-                <span className="text-ink">concierge@manchesterautogallery.com</span>
+                <span className="text-ink">-----</span>
               </div>
 
               <div className="flex items-center gap-2.5 pt-1 text-[11px] font-mono text-body">
@@ -143,7 +141,23 @@ export const Footer: React.FC<FooterProps> = ({ onOpenBooking }) => {
 
         {/* Sub-footer Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] font-mono text-gold-deep">
-          <p>© {new Date().getFullYear()} Manchester Auto Gallery Ltd. Dubai, United Arab Emirates. All rights reserved.</p>
+          <div>
+            <p>© {new Date().getFullYear()} Manchester Auto Gallery Ltd. Dubai, United Arab Emirates. All rights reserved.</p>
+            <p className="mt-1 normal-case tracking-normal opacity-60">
+              3D model “Mercedes-Benz Maybach 2022” by Mpgs Studios, licensed CC BY 4.0 (modified: reduced polygon count).
+            </p>
+            <p className="mt-1 normal-case tracking-normal opacity-80">
+              Website designed &amp; developed by{' '}
+              <a
+                href="https://taksquad.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2 hover:text-ink transition-colors"
+              >
+                TAK
+              </a>
+            </p>
+          </div>
           <div className="flex items-center gap-6">
             <a href="#about" className="hover:text-ink transition-colors">Privacy Protocol</a>
             <a href="#about" className="hover:text-ink transition-colors">Non-Disclosure Standards</a>

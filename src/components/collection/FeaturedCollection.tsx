@@ -48,7 +48,7 @@ export const FeaturedCollection: React.FC<FeaturedCollectionProps> = ({ currency
                 className={`px-4 py-2 rounded-xl text-xs font-display uppercase tracking-wider transition-all duration-300 ${
                   selectedCategory === cat
                     ? 'bg-gradient-to-r from-[#D4AF37] to-[#B38E22] text-white font-bold shadow-md shadow-[#D4AF37]/30'
-                    : 'text-muted hover:text-ink hover:bg-[#F9F9F7]'
+                    : 'text-muted hover:text-ink hover:bg-warm-2'
                 }`}
               >
                 {cat}
@@ -65,7 +65,7 @@ export const FeaturedCollection: React.FC<FeaturedCollectionProps> = ({ currency
               className="group cursor-pointer relative bg-paper border border-[#D4AF37]/25 rounded-3xl overflow-hidden hover:border-[#D4AF37] transition-all duration-500 shadow-[0_15px_40px_rgba(212,175,55,0.08)] hover:shadow-[0_25px_60px_rgba(212,175,55,0.22)] hover:-translate-y-1.5 flex flex-col justify-between"
             >
               <div className="relative aspect-16/10 overflow-hidden bg-[#F7F6F3]">
-                <img
+                <img decoding="async"
                   src={car.heroImage}
                   alt={`${car.manufacturer} ${car.model}`}
                   className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-106 group-hover:brightness-105"

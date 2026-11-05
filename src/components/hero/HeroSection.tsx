@@ -1,7 +1,12 @@
-import React from 'react';
-import { HeroCarScene } from '../3d/HeroCarScene';
+import React, { Suspense } from 'react';
 import { HIDDEN } from '../../data/vehicles';
 import { ChevronRight, Sparkles } from 'lucide-react';
+
+// three.js (the heavy part of the bundle) loads in its own chunk, after the page text is
+// already on screen. The import starts immediately, so nothing is delayed.
+const HeroCarScene = React.lazy(() =>
+  import('../3d/HeroCarScene').then((m) => ({ default: m.HeroCarScene }))
+);
 
 interface HeroSectionProps {
   onExploreCollection: () => void;
@@ -19,9 +24,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           Desktop (lg+): full-bleed background behind the copy. */}
       <div className="relative order-2 flex-1 min-h-[360px] sm:min-h-[420px] z-0 lg:absolute lg:inset-0 lg:order-none lg:min-h-0">
         <div className="absolute inset-0">
-          <HeroCarScene />
+          <Suspense fallback={<div className="w-full h-full bg-[#08090B]" />}>
+            <HeroCarScene />
+          </Suspense>
         </div>
       </div>
+
+      {/* Soft left-hand scrim so the headline stays readable over the bright glass facade */}
+      <div className="hidden lg:block absolute inset-0 z-[1] pointer-events-none bg-gradient-to-r from-black/65 via-black/25 to-transparent" />
 
       {/* Editorial copy */}
       <div className="relative order-1 z-10 max-w-7xl mx-auto px-6 md:px-12 pt-24 sm:pt-28 md:pt-32 lg:pt-52 xl:pt-60 pb-2 lg:pb-0 pointer-events-none w-full lg:order-none">

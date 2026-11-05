@@ -143,7 +143,7 @@ export const VehicleModal: React.FC<VehicleModalProps> = ({
               </div>
 
               <div className="relative aspect-16/10 rounded-2xl overflow-hidden border border-[#D4AF37]/30 bg-paper shadow-md">
-                <img
+                <img decoding="async"
                   src={vehicle.gallery[activeImageIndex] || vehicle.heroImage}
                   alt={`${vehicle.manufacturer} ${vehicle.model}`}
                   className="w-full h-full object-cover transition-all duration-700"
@@ -171,7 +171,7 @@ export const VehicleModal: React.FC<VehicleModalProps> = ({
                           : 'border-line opacity-70 hover:opacity-100'
                       }`}
                     >
-                      <img src={img} alt="Gallery view" className="w-full h-full object-cover" />
+                      <img decoding="async" src={img} alt="Gallery view" className="w-full h-full object-cover" />
                     </button>
                   ))}
                 </div>

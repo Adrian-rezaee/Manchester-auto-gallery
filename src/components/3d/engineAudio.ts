@@ -1,7 +1,8 @@
 /**
- * Land Cruiser start-up sound for the "Lights on" button.
+ * Start-up sound for the "Lights on" button (or dark mode). Every car has its own recording:
+ * public/audio/landcruiser-engine.mp3 and public/audio/maybach-engine.mp3.
  *
- * Plays public/audio/landcruiser-engine.mp3 once (starter -> engine catching -> exhaust /
+ * Plays the recording of the car that is on screen once (starter -> engine catching -> exhaust /
  * idle). While it plays, getLoudness() reports how loud the recording is at this exact
  * moment (0..1), so the car's front and rear lights can swell with the exhaust note.
  *
@@ -9,7 +10,13 @@
  * whatever file is there, nothing else needs to change.
  */
 
-const AUDIO_URL = `${import.meta.env.BASE_URL}audio/landcruiser-engine.mp3`;
+import type { CarKey } from './stages';
+
+/** One start-up recording per car: the Land Cruiser keeps its own, the Maybach has its own. */
+const AUDIO_URLS: Record<CarKey, string> = {
+  landcruiser: `${import.meta.env.BASE_URL}audio/landcruiser-engine.mp3`,
+  maybach: `${import.meta.env.BASE_URL}audio/maybach-engine.mp3`,
+};
 
 const PLAY_LEVEL = 0.85; // master volume of the recording
 const END_FADE = 1.2; // seconds of fade-out at the very end of the clip
@@ -18,7 +25,7 @@ const REST_LOUDNESS = 0.35; // light drive once the clip has finished (engine "i
 const ENV_HOP = 0.05; // seconds per loudness sample
 
 export interface EngineSound {
-  start: () => void;
+  start: (car?: CarKey) => void;
   stop: () => void;
   dispose: () => void;
   /** 0..1 loudness of the recording right now (REST_LOUDNESS when nothing is playing) */
@@ -75,10 +82,10 @@ export function createEngineSound(): EngineSound {
   let token = 0;
   let disposed = false;
 
-  // Fetch + decode as soon as the page is up, so the click plays instantly.
-  const loaded: Promise<Loaded | null> = (async () => {
+  // Fetch + decode every car's clip as soon as the page is up, so the click plays instantly.
+  const loadClip = async (url: string): Promise<Loaded | null> => {
     try {
-      const res = await fetch(AUDIO_URL);
+      const res = await fetch(url);
       if (!res.ok) return null;
       const data = await res.arrayBuffer();
       const Offline: typeof OfflineAudioContext =
@@ -88,12 +95,15 @@ export function createEngineSound(): EngineSound {
       const buffer = await new Offline(2, 1, 44100).decodeAudioData(data);
       return { buffer, envelope: measureEnvelope(buffer) };
     } catch (err) {
-      console.warn('Engine sound could not be loaded', err);
+      console.warn('Engine sound could not be loaded', url, err);
       return null;
     }
-  })();
-  let clip: Loaded | null = null;
-  void loaded.then((l) => (clip = l));
+  };
+  const loaded: Record<CarKey, Promise<Loaded | null>> = {
+    landcruiser: loadClip(AUDIO_URLS.landcruiser),
+    maybach: loadClip(AUDIO_URLS.maybach),
+  };
+  let clip: Loaded | null = null; // the clip that is playing right now (drives the light loudness)
 
   const ensureContext = () => {
     if (ctx) return ctx;
@@ -121,14 +131,14 @@ export function createEngineSound(): EngineSound {
     source = null;
   };
 
-  const start = () => {
+  const start = (car: CarKey = 'landcruiser') => {
     if (disposed) return;
     try {
       const c = ensureContext();
       void c.resume(); // inside the click, so the browser allows sound
       silence(0.03);
       const my = ++token;
-      void loaded.then((l) => {
+      void loaded[car].then((l) => {
         if (!l || my !== token || disposed || !ctx || !gain) return;
         const src = ctx.createBufferSource();
         src.buffer = l.buffer;
@@ -148,6 +158,7 @@ export function createEngineSound(): EngineSound {
           }
         };
         source = src;
+        clip = l;
         startedAt = t0;
         playing = true;
       });

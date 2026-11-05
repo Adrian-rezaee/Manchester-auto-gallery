@@ -9,15 +9,35 @@ import * as THREE from 'three';
  * y ≈ 0.90 … 1.10, leaning 14° (top towards the nose) with its surface at z ≈ -2.375.
  */
 
-const PLATE_W = 0.46; // metres
-const PLATE_H = 0.19; // along the slanted panel
+export interface PlateSpec {
+  /** plate width / height in metres (height along the panel) */
+  w: number;
+  h: number;
+  /** centre of the plate on the tailgate */
+  point: THREE.Vector3;
+  /** outward normal of the tailgate panel */
+  normal: THREE.Vector3;
+}
 const PLATE_DEPTH = 0.008;
 const RADIUS = 0.014;
 
 // centre of the plate on the tailgate recess
-const SURFACE_POINT = new THREE.Vector3(0, 1.0, -2.375);
-// outward normal of the recess (points backwards and a little up)
-const SURFACE_NORMAL = new THREE.Vector3(0, 0.2425, -0.9701).normalize();
+export const LAND_CRUISER_PLATE: PlateSpec = {
+  w: 0.46,
+  h: 0.19,
+  point: new THREE.Vector3(0, 1.0, -2.375),
+  // outward normal of the recess (points backwards and a little up)
+  normal: new THREE.Vector3(0, 0.2425, -0.9701).normalize(),
+};
+
+// Maybach: ray-cast on maybach.glb — the boot lid is an almost vertical panel at z ≈ -2.62,
+// y ≈ 0.77 … 0.93, x ± 0.26 (a European-format plate fits the flat)
+export const MAYBACH_PLATE: PlateSpec = {
+  w: 0.5,
+  h: 0.135,
+  point: new THREE.Vector3(0, 0.85, -2.622),
+  normal: new THREE.Vector3(0, 0.04, -1).normalize(),
+};
 
 const GOLD_LIGHT = '#F1D77A';
 const GOLD = '#D4AF37';
@@ -86,7 +106,11 @@ export interface RearPlate {
   dispose: () => void;
 }
 
-export function createRearPlate(maxAnisotropy = 1): RearPlate {
+export function createRearPlate(maxAnisotropy = 1, spec: PlateSpec = LAND_CRUISER_PLATE): RearPlate {
+  const PLATE_W = spec.w;
+  const PLATE_H = spec.h;
+  const SURFACE_POINT = spec.point;
+  const SURFACE_NORMAL = spec.normal;
   const W = 2048;
   const H = Math.round((W * PLATE_H) / PLATE_W);
   const canvas = document.createElement('canvas');
