@@ -13,7 +13,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Sparkles,
-} from 'lucide-react';
+} from '../ui/Icon';
 
 interface VehicleModalProps {
   vehicle: Vehicle | null;
@@ -94,7 +94,7 @@ export const VehicleModal: React.FC<VehicleModalProps> = ({
   return (
     <div
       data-veltrix-modal="vehicle"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 bg-black/60 backdrop-blur-2xl overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 bg-black/80 md:bg-black/60 md:backdrop-blur-xl overflow-y-auto"
     >
       <div
         className="relative w-full max-w-5xl bg-paper border-2 border-[#D4AF37]/40 rounded-3xl shadow-[0_25px_80px_rgba(212,175,55,0.25)] overflow-hidden my-auto"
@@ -152,7 +152,7 @@ export const VehicleModal: React.FC<VehicleModalProps> = ({
 
                 <button
                   onClick={playEngineSound}
-                  className="absolute bottom-4 left-4 z-10 px-3.5 py-1.5 rounded-xl bg-paper/90 backdrop-blur-md border border-[#D4AF37]/40 text-[11px] font-mono font-bold text-ink hover:border-[#D4AF37] flex items-center gap-2 shadow-lg transition-all"
+                  className="absolute bottom-4 left-4 z-10 px-3.5 py-1.5 rounded-xl bg-paper/95 border border-[#D4AF37]/40 text-[11px] font-mono font-bold text-ink hover:border-[#D4AF37] flex items-center gap-2 shadow-lg transition-all"
                 >
                   <Volume2 className={`w-3.5 h-3.5 text-gold-mid ${isPlayingAudio ? 'animate-pulse' : ''}`} />
                   <span>{isPlayingAudio ? 'Playing…' : 'Play engine note'}</span>

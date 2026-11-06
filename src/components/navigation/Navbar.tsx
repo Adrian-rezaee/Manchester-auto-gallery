@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, ArrowUpRight, ChevronDown, Sparkles } from 'lucide-react';
+import { Menu, X, ArrowUpRight, ChevronDown, Sparkles } from '../ui/Icon';
 import { CURRENCIES, CurrencyCode } from '../../data/vehicles';
 import { AutogalleryMark } from '../brand/Logo';
 import { ThemeToggle } from './ThemeToggle';
@@ -85,8 +85,8 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div
           className={`pointer-events-auto max-w-7xl mx-auto flex items-center justify-between gap-4 rounded-full border px-4 sm:px-6 transition-all duration-500 ${
             isScrolled
-              ? 'py-2 bg-paper/85 backdrop-blur-2xl border-[#D4AF37]/35 shadow-[0_12px_40px_rgba(212,175,55,0.16)]'
-              : 'py-3 bg-black/25 backdrop-blur-xl border-white/15'
+              ? 'py-2 bg-paper/95 md:bg-paper/85 md:backdrop-blur-xl border-[#D4AF37]/35 shadow-[0_10px_30px_rgba(212,175,55,0.14)]'
+              : 'py-3 bg-black/45 md:bg-black/25 md:backdrop-blur-xl border-white/15'
           }`}
         >
           {/* Logo */}
@@ -108,7 +108,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <a
                 key={link.id}
                 href={link.href}
-                className={`rounded-full px-4 py-2 text-[11px] uppercase tracking-[0.18em] font-display font-semibold transition-all duration-300 ${linkClass(
+                className={`press rounded-full px-4 py-2 text-[11px] uppercase tracking-[0.18em] font-display font-semibold transition-[background-color,color,box-shadow,transform] duration-300 ${linkClass(
                   link.id
                 )}`}
               >
@@ -164,7 +164,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             <button
               onClick={() => onOpenBookingModal()}
-              className="group px-5 py-2.5 rounded-full bg-gradient-to-r from-[#D4AF37] via-[#F3DC82] to-[#C29B28] text-[#0E1013] font-display font-bold text-[11px] uppercase tracking-[0.18em] shadow-lg shadow-[#D4AF37]/25 hover:shadow-xl hover:shadow-[#D4AF37]/45 hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-2"
+              className="group px-5 py-2.5 rounded-full bg-gradient-to-r from-[#D4AF37] via-[#F3DC82] to-[#C29B28] text-[#0E1013] font-display font-bold text-[11px] uppercase tracking-[0.18em] shadow-lg shadow-[#D4AF37]/25 btn-shine press flex items-center gap-2"
             >
               <Sparkles className="w-3.5 h-3.5 text-[#6B520E] shrink-0" />
               <span>Book Viewing</span>
@@ -194,7 +194,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Mobile drawer */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-40 bg-paper/97 backdrop-blur-2xl flex flex-col justify-between p-6 pt-28 lg:hidden overflow-y-auto">
+        <div className="fixed inset-0 z-40 bg-paper flex flex-col justify-between p-6 pt-28 lg:hidden overflow-y-auto">
           <div className="space-y-6">
             <div className="flex flex-col gap-2">
               {NAV_LINKS.map((link) => (
@@ -242,7 +242,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 setMobileMenuOpen(false);
                 onOpenBookingModal();
               }}
-              className="w-full py-4 rounded-full bg-gradient-to-r from-[#D4AF37] via-[#F3DC82] to-[#C29B28] text-[#0E1013] font-display text-xs font-bold uppercase tracking-[0.2em] shadow-xl flex items-center justify-center gap-2"
+              className="btn-shine press w-full py-4 rounded-full bg-gradient-to-r from-[#D4AF37] via-[#F3DC82] to-[#C29B28] text-[#0E1013] font-display text-xs font-bold uppercase tracking-[0.2em] shadow-xl flex items-center justify-center gap-2"
             >
               <span>Book Viewing</span>
               <ArrowUpRight className="w-4 h-4" />

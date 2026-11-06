@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { VEHICLES, Vehicle, CurrencyCode, HIDDEN, formatPrice } from '../../data/vehicles';
-import { ArrowUpRight, Gauge, Zap, Flame, Sparkles } from 'lucide-react';
+import { ArrowUpRight, Gauge, Zap, Flame, Sparkles } from '../ui/Icon';
 
 interface FeaturedCollectionProps {
   currency: CurrencyCode;
@@ -18,10 +18,10 @@ export const FeaturedCollection: React.FC<FeaturedCollectionProps> = ({ currency
       : VEHICLES.filter((v) => v.category === selectedCategory);
 
   return (
-    <section id="collection" className="relative py-28 md:py-36 bg-warm text-ink overflow-hidden">
+    <section id="collection" className="cv-auto relative py-24 md:py-32 bg-warm text-ink overflow-hidden">
       <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-[#D4AF37]/40 to-transparent" />
-      <div className="absolute top-20 right-0 w-[500px] h-[500px] bg-[#D4AF37]/8 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-20 left-0 w-[500px] h-[500px] bg-[#F3E5AB]/20 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute top-10 right-0 w-[min(600px,100vw)] h-[600px] orb-gold pointer-events-none" />
+      <div className="absolute bottom-10 left-0 w-[min(600px,100vw)] h-[600px] orb-cream pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
@@ -45,7 +45,7 @@ export const FeaturedCollection: React.FC<FeaturedCollectionProps> = ({ currency
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-2 rounded-xl text-xs font-display uppercase tracking-wider transition-all duration-300 ${
+                className={`press px-4 py-2 rounded-xl text-xs font-display uppercase tracking-wider transition-[background-color,color,box-shadow] duration-300 ${
                   selectedCategory === cat
                     ? 'bg-gradient-to-r from-[#D4AF37] to-[#B38E22] text-white font-bold shadow-md shadow-[#D4AF37]/30'
                     : 'text-muted hover:text-ink hover:bg-warm-2'
@@ -62,19 +62,19 @@ export const FeaturedCollection: React.FC<FeaturedCollectionProps> = ({ currency
             <div
               key={car.id}
               onClick={() => onSelectVehicle(car)}
-              className="group cursor-pointer relative bg-paper border border-[#D4AF37]/25 rounded-3xl overflow-hidden hover:border-[#D4AF37] transition-all duration-500 shadow-[0_15px_40px_rgba(212,175,55,0.08)] hover:shadow-[0_25px_60px_rgba(212,175,55,0.22)] hover:-translate-y-1.5 flex flex-col justify-between"
+              className="group card-lux press cursor-pointer relative bg-paper border border-[#D4AF37]/25 rounded-3xl shadow-[0_12px_32px_rgba(212,175,55,0.08)] flex flex-col justify-between"
             >
-              <div className="relative aspect-16/10 overflow-hidden bg-[#F7F6F3]">
+              <div className="sheen relative aspect-16/10 overflow-hidden rounded-t-3xl bg-[#F7F6F3]">
                 <img decoding="async"
                   src={car.heroImage}
                   alt={`${car.manufacturer} ${car.model}`}
-                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-106 group-hover:brightness-105"
+                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-paper via-transparent to-black/10 pointer-events-none" />
 
                 <div className="absolute top-4 left-4 z-10">
-                  <span className="px-3 py-1 rounded-full text-[10px] font-mono tracking-widest uppercase bg-paper/90 backdrop-blur-md text-gold-deep font-bold border border-[#D4AF37]/30 shadow-sm">
+                  <span className="px-3 py-1 rounded-full text-[10px] font-mono tracking-widest uppercase bg-paper/95 text-gold-deep font-bold border border-[#D4AF37]/30 shadow-sm">
                     {car.status}
                   </span>
                 </div>
@@ -85,7 +85,7 @@ export const FeaturedCollection: React.FC<FeaturedCollectionProps> = ({ currency
                   </span>
                 </div>
 
-                <div className="absolute bottom-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="absolute bottom-4 right-4 z-10 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-[opacity,transform] duration-300">
                   <span className="px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#D4AF37] via-[#FFF0A8] to-[#C29B28] text-[#0E1013] text-[11px] font-display font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-xl">
                     <span>View Dossier</span>
                     <ArrowUpRight className="w-3.5 h-3.5" />

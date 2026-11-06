@@ -169,11 +169,12 @@ h1, h2 {
 }
 
 /* Smooth cross-fade of every colour while the theme flips */
-html.theme-transition,
-html.theme-transition *,
-html.theme-transition *::before,
-html.theme-transition *::after {
-  transition: background-color 0.6s ease, border-color 0.6s ease, color 0.6s ease, fill 0.6s ease, stroke 0.6s ease, box-shadow 0.6s ease !important;
+/* The toggle is excluded: this rule uses !important and would otherwise replace the knob's own
+   transform transition, making it snap instead of glide. box-shadow is left out on purpose. */
+html.theme-transition *:not(.theme-toggle):not(.theme-toggle *),
+html.theme-transition *:not(.theme-toggle):not(.theme-toggle *)::before,
+html.theme-transition *:not(.theme-toggle):not(.theme-toggle *)::after {
+  transition: background-color 0.45s ease, border-color 0.45s ease, color 0.45s ease, fill 0.45s ease, stroke 0.45s ease !important;
 }
 
 /* Dark mode: softer gold glow on cards */
@@ -282,4 +283,203 @@ html.theme-transition *::after {
 }
 @media (prefers-reduced-motion: reduce) {
   .car-swap-streak, .car-swap-title { animation-duration: 0.01ms; animation-delay: 0s; }
+}
+
+/* ================================================================== */
+/*  Interaction system (hover / press) — GPU-friendly only:            */
+/*  transform + opacity, no animated box-shadow or filter.             */
+/*  Every hover rule sits inside (hover: hover) so touch screens never */
+/*  get "stuck" hover states.                                          */
+/* ================================================================== */
+:root {
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Component layer: Tailwind utilities (transition-*, text-*, etc.) can still override these per element */
+@layer components {
+a, button, [role='button'] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Tap feedback on phones */
+.press {
+  transition: transform 0.2s var(--ease-out);
+}
+.press:active {
+  transform: scale(0.97);
+}
+
+/* Card: lift + gold halo. The halo is a pseudo-element faded in with opacity. */
+.card-lux {
+  position: relative;
+  transition: transform 0.55s var(--ease-out), border-color 0.35s ease;
+}
+.card-lux::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: 0 30px 60px -22px rgba(212, 175, 55, 0.42), 0 0 0 1px rgba(212, 175, 55, 0.55);
+  opacity: 0;
+  transition: opacity 0.45s ease;
+}
+.dark .card-lux::after {
+  box-shadow: 0 30px 60px -22px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(227, 191, 77, 0.55);
+}
+
+/* Diagonal light sweep over images / cards */
+.sheen {
+  position: relative;
+  overflow: hidden;
+}
+.sheen::before {
+  content: '';
+  position: absolute;
+  top: -20%;
+  bottom: -20%;
+  left: -60%;
+  width: 36%;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(100deg, transparent, rgba(255, 244, 196, 0.5), transparent);
+  transform: skewX(-18deg);
+}
+
+/* Gold button: light sweep on hover */
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: transform 0.35s var(--ease-out), box-shadow 0.35s ease, border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+}
+.btn-shine::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -70%;
+  width: 45%;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  transform: skewX(-20deg);
+  transition: transform 0.7s var(--ease-out);
+}
+
+/* Underline that grows from the left */
+.link-u {
+  background: linear-gradient(currentColor, currentColor) left bottom / 0 1px no-repeat;
+  transition: background-size 0.4s var(--ease-out), color 0.25s ease;
+  padding-bottom: 2px;
+}
+
+/* Icon tile: gold fill rises in behind the icon */
+.icon-tile {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  transition: transform 0.5s var(--ease-out), color 0.3s ease, border-color 0.3s ease;
+}
+.icon-tile::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(135deg, #e8c858, #b38e22);
+  opacity: 0;
+  transform: scale(0.55);
+  transition: opacity 0.35s ease, transform 0.5s var(--ease-out);
+}
+
+/* Service row: tint slides in from the left */
+.row-fill {
+  position: relative;
+  isolation: isolate;
+}
+.row-fill::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(90deg, rgba(212, 175, 55, 0.14), rgba(212, 175, 55, 0.02));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.6s var(--ease-out);
+}
+
+@keyframes sheen-sweep {
+  0%   { opacity: 0; transform: skewX(-18deg) translateX(0); }
+  20%  { opacity: 1; }
+  100% { opacity: 0; transform: skewX(-18deg) translateX(560%); }
+}
+
+@media (hover: hover) {
+  .card-lux:hover {
+    transform: translateY(-6px);
+  }
+  .card-lux:hover::after {
+    opacity: 1;
+  }
+  .group:hover .sheen::before,
+  .sheen:hover::before {
+    animation: sheen-sweep 1s var(--ease-out) both;
+  }
+  .btn-shine:hover::before {
+    transform: skewX(-20deg) translateX(520%);
+  }
+  .btn-shine:hover {
+    transform: translateY(-2px);
+  }
+  .link-u:hover,
+  .group:hover .link-u {
+    background-size: 100% 1px;
+  }
+  .group:hover .icon-tile {
+    color: #0e1013;
+    border-color: transparent;
+    transform: translateY(-3px) rotate(-5deg);
+  }
+  .group:hover .icon-tile::before {
+    opacity: 1;
+    transform: scale(1);
+  }
+  .group:hover .row-fill::before,
+  .row-fill:hover::before {
+    transform: scaleX(1);
+  }
+}
+
+/* Gold glow without a blur filter (blur-[120px] layers are very costly on phones) */
+.orb-gold {
+  background: radial-gradient(closest-side, rgba(212, 175, 55, 0.16), rgba(212, 175, 55, 0) 100%);
+}
+.orb-cream {
+  background: radial-gradient(closest-side, rgba(243, 229, 171, 0.3), rgba(243, 229, 171, 0) 100%);
+}
+
+/* Off-screen sections aren't laid out or painted until they get close */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
+}
+
+@media (max-width: 767px) {
+  /* glass blur is expensive on phones — use a more opaque flat surface instead */
+  .gold-card {
+    backdrop-filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-lux, .btn-shine, .icon-tile, .press, .row-fill::before {
+    transition: none !important;
+  }
+  .card-lux:hover, .btn-shine:hover, .group:hover .icon-tile {
+    transform: none !important;
+  }
+  .sheen::before { display: none; }
+}
 }

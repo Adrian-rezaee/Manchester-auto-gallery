@@ -1,89 +1,98 @@
 import React from 'react';
 import { HIDDEN } from '../../data/vehicles';
-import { Plane, ShieldAlert, Award, FileCheck2, ArrowUpRight, Sparkles } from 'lucide-react';
+import { Plane, ShieldAlert, Award, FileCheck2, ArrowUpRight, ArrowRight } from '../ui/Icon';
 
 interface ConciergeServicesProps {
   onInquire: () => void;
 }
 
-export const ConciergeServices: React.FC<ConciergeServicesProps> = ({ onInquire }) => {
-  const services = [
-    {
-      icon: <Plane className="w-6 h-6 text-gold-mid" />,
-      title: 'Global Air Freight Logistics',
-      desc: HIDDEN,
-    },
-    {
-      icon: <ShieldAlert className="w-6 h-6 text-gold-mid" />,
-      title: 'Off-Market Confidential Brokerage',
-      desc: HIDDEN,
-    },
-    {
-      icon: <FileCheck2 className="w-6 h-6 text-gold-mid" />,
-      title: 'DIFC Free Zone & Tax Exemption',
-      desc: HIDDEN,
-    },
-    {
-      icon: <Award className="w-6 h-6 text-gold-mid" />,
-      title: 'Trackside Engineering Support',
-      desc: HIDDEN,
-    },
-  ];
+// Description text is still the HIDDEN placeholder: it is simply not rendered until real copy is set.
+const hasCopy = (s: string) => s !== HIDDEN;
 
+const SERVICES: { Icon: React.FC<React.SVGProps<SVGSVGElement>>; title: string; desc: string }[] = [
+  { Icon: Plane, title: 'Global Air Freight Logistics', desc: HIDDEN },
+  { Icon: ShieldAlert, title: 'Off-Market Confidential Brokerage', desc: HIDDEN },
+  { Icon: FileCheck2, title: 'DIFC Free Zone & Tax Exemption', desc: HIDDEN },
+  { Icon: Award, title: 'Trackside Engineering Support', desc: HIDDEN },
+];
+
+const INTRO: string = HIDDEN;
+
+/**
+ * Services — an editorial index instead of four identical cards.
+ * Desktop: sticky intro on the left, numbered rows on the right.
+ * Phone: a single column of full-width rows (no cards, no shadows, nothing heavy to paint).
+ * Spacing sits on a strict 8px rhythm: 24 / 32 / 48 / 64 / 96.
+ */
+export const ConciergeServices: React.FC<ConciergeServicesProps> = ({ onInquire }) => {
   return (
-    <section id="services" className="relative py-28 md:py-36 bg-paper text-ink overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
-          <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-warm border border-[#D4AF37]/35 shadow-xs">
-              <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
-              <span className="text-xs font-mono tracking-[0.3em] text-gold-deep uppercase font-bold">
-                PRIVATE CLIENT CONCIERGE
-              </span>
-            </div>
-            <h2 className="font-display font-black text-3xl sm:text-5xl lg:text-6xl tracking-tight text-ink">
-              SOVEREIGN <span className="text-gradient-gold">SERVICES.</span>
-            </h2>
-            <p className="text-sm md:text-base text-body max-w-xl">
-              {HIDDEN}
-            </p>
-          </div>
+    <section id="services" className="cv-auto relative bg-paper text-ink py-24 md:py-32">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+        {/* Intro */}
+        <div className="lg:col-span-5 lg:sticky lg:top-32 lg:self-start">
+          <p className="flex items-center gap-4 text-[11px] font-bold uppercase tracking-[0.32em] text-gold-deep">
+            <span className="h-px w-10 bg-gold-mid" aria-hidden="true" />
+            Private Client Concierge
+          </p>
+
+          <h2 className="mt-6 font-display font-black text-4xl sm:text-5xl lg:text-6xl leading-[1.02] tracking-tight text-ink">
+            SOVEREIGN
+            <br />
+            <span className="text-gradient-gold">SERVICES.</span>
+          </h2>
+
+          {hasCopy(INTRO) && (
+            <p className="mt-6 max-w-md text-base leading-relaxed text-body">{INTRO}</p>
+          )}
 
           <button
+            type="button"
             onClick={onInquire}
-            className="px-6 py-3.5 rounded-sm border border-[#D4AF37]/50 hover:border-[#D4AF37] bg-paper text-xs font-display font-bold uppercase tracking-[0.2em] text-ink hover:text-gold-mid shadow-sm hover:shadow-md transition-all flex items-center gap-2 self-start md:self-auto"
+            className="btn-shine press group mt-10 inline-flex items-center gap-3 rounded-full border border-[#D4AF37] bg-gradient-to-r from-[#D4AF37] via-[#F3DC82] to-[#C29B28] px-7 py-4 text-[11px] font-bold uppercase tracking-[0.22em] text-[#0E1013]"
           >
             <span>Consult Client Officer</span>
-            <ArrowUpRight className="w-4 h-4 text-gold-mid" />
+            <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </button>
         </div>
 
-        {/* Services Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {services.map((srv, i) => (
-            <div
-              key={i}
-              className="p-8 rounded-3xl bg-warm border border-[#D4AF37]/25 space-y-4 hover:border-[#D4AF37] hover:bg-paper shadow-[0_10px_30px_rgba(212,175,55,0.06)] hover:shadow-[0_20px_45px_rgba(212,175,55,0.16)] transition-all duration-300 flex flex-col justify-between"
-            >
-              <div className="space-y-4">
-                <div className="p-3.5 rounded-2xl bg-paper border border-[#D4AF37]/30 shadow-xs w-fit">
-                  {srv.icon}
-                </div>
-                <h3 className="font-display font-black text-base md:text-lg text-ink">
-                  {srv.title}
-                </h3>
-                <p className="text-xs text-body leading-relaxed">
-                  {srv.desc}
-                </p>
-              </div>
+        {/* Index */}
+        <ol className="lg:col-span-7 border-t border-[#D4AF37]/35">
+          {SERVICES.map(({ Icon, title, desc }, i) => (
+            <li key={title} className="border-b border-[#D4AF37]/35">
+              <button
+                type="button"
+                onClick={onInquire}
+                className="group row-fill press grid w-full grid-cols-[auto_1fr_auto] items-center gap-x-5 md:gap-x-8 px-0 py-8 md:px-6 md:py-10 text-left"
+                aria-label={`${title} — enquire`}
+              >
+                {/* Index number + icon */}
+                <span className="flex items-center gap-4 md:gap-6">
+                  <span className="w-7 font-display text-sm font-bold tabular-nums tracking-[0.18em] text-gold-deep">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span className="icon-tile flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[#D4AF37]/45 bg-warm text-gold-mid group-hover:border-transparent group-hover:text-[#0E1013]">
+                    <Icon className="h-6 w-6" />
+                  </span>
+                </span>
 
-              <div className="pt-4 border-t border-[#D4AF37]/20 flex items-center justify-between text-[11px] font-mono text-muted">
-                <span>Concierge Protocol</span>
-                <span className="text-gold-mid font-bold">{HIDDEN}</span>
-              </div>
-            </div>
+                {/* Title (+ description once real copy replaces the placeholder) */}
+                <span className="min-w-0">
+                  <span className="block font-display text-xl font-bold leading-snug text-ink transition-colors duration-300 group-hover:text-gold-mid md:text-2xl lg:text-[1.7rem]">
+                    {title}
+                  </span>
+                  {hasCopy(desc) && (
+                    <span className="mt-2 block text-sm leading-relaxed text-body md:text-base">{desc}</span>
+                  )}
+                </span>
+
+                {/* Arrow */}
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#D4AF37]/45 text-gold-deep transition-[transform,background-color,color,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-rotate-45 group-hover:border-[#D4AF37] group-hover:bg-[#D4AF37] group-hover:text-[#0E1013]">
+                  <ArrowRight className="h-4 w-4" />
+                </span>
+              </button>
+            </li>
           ))}
-        </div>
+        </ol>
       </div>
     </section>
   );

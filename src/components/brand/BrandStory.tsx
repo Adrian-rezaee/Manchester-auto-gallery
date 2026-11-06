@@ -1,10 +1,10 @@
 import React from 'react';
 import { HIDDEN } from '../../data/vehicles';
-import { ShieldCheck, Compass, Sparkles, Layers, Award } from 'lucide-react';
+import { ShieldCheck, Compass, Sparkles, Layers, Award } from '../ui/Icon';
 
 export const BrandStory: React.FC = () => {
   return (
-    <section id="about" className="relative py-28 md:py-40 bg-paper text-ink overflow-hidden">
+    <section id="about" className="cv-auto relative py-24 md:py-36 bg-paper text-ink overflow-hidden">
       {/* Editorial Decorative Watermark in Soft Champagne */}
       <div className="absolute right-0 top-1/2 -translate-y-1/2 select-none pointer-events-none opacity-[0.035] font-display font-black text-[20vw] leading-none tracking-tighter text-[#D4AF37]">
         AURUM
@@ -32,11 +32,11 @@ export const BrandStory: React.FC = () => {
           {/* Left Column: Atmospheric Macro Craftsmanship Photography Diptych */}
           <div className="lg:col-span-6 space-y-8">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="relative rounded-3xl overflow-hidden border border-[#D4AF37]/30 aspect-4/5 group shadow-[0_15px_40px_rgba(212,175,55,0.12)]">
+              <div className="relative rounded-3xl overflow-hidden border border-[#D4AF37]/30 aspect-4/5 group sheen shadow-[0_12px_32px_rgba(212,175,55,0.12)]">
                 <img decoding="async"
                   src={`${import.meta.env.BASE_URL}images/white-cockpit-gold.webp`}
                   alt="Manchester Auto Gallery Bespoke Ivory & Gold Cockpit Craftsmanship"
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-106"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
@@ -50,11 +50,11 @@ export const BrandStory: React.FC = () => {
                 </div>
               </div>
 
-              <div className="relative rounded-3xl overflow-hidden border border-[#D4AF37]/30 aspect-4/5 group shadow-[0_15px_40px_rgba(212,175,55,0.12)] sm:translate-y-8">
+              <div className="relative rounded-3xl overflow-hidden border border-[#D4AF37]/30 aspect-4/5 group sheen shadow-[0_12px_32px_rgba(212,175,55,0.12)] sm:translate-y-8">
                 <img decoding="async"
                   src={`${import.meta.env.BASE_URL}images/white-aero-gold.webp`}
                   alt="Manchester Auto Gallery Aerodynamic Sculpture in Pearl & Gold"
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-106"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
@@ -93,8 +93,8 @@ export const BrandStory: React.FC = () => {
 
             {/* Core Pillars Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-[#D4AF37]/25">
-              <div className="p-5 rounded-2xl bg-warm border border-[#D4AF37]/25 shadow-xs space-y-2.5">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#B38E22] flex items-center justify-center text-white shadow-md shadow-[#D4AF37]/20">
+              <div className="group card-lux p-5 rounded-2xl bg-warm border border-[#D4AF37]/25 space-y-2.5">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#B38E22] flex items-center justify-center text-white shadow-md shadow-[#D4AF37]/20 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-rotate-6 group-hover:scale-110">
                   <ShieldCheck className="w-5 h-5" />
                 </div>
                 <h4 className="font-display font-bold text-sm tracking-wide text-ink">
@@ -105,8 +105,8 @@ export const BrandStory: React.FC = () => {
                 </p>
               </div>
 
-              <div className="p-5 rounded-2xl bg-warm border border-[#D4AF37]/25 shadow-xs space-y-2.5">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#B38E22] flex items-center justify-center text-white shadow-md shadow-[#D4AF37]/20">
+              <div className="group card-lux p-5 rounded-2xl bg-warm border border-[#D4AF37]/25 space-y-2.5">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#B38E22] flex items-center justify-center text-white shadow-md shadow-[#D4AF37]/20 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-rotate-6 group-hover:scale-110">
                   <Compass className="w-5 h-5" />
                 </div>
                 <h4 className="font-display font-bold text-sm tracking-wide text-ink">
@@ -117,8 +117,8 @@ export const BrandStory: React.FC = () => {
                 </p>
               </div>
 
-              <div className="p-5 rounded-2xl bg-warm border border-[#D4AF37]/25 shadow-xs space-y-2.5">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#B38E22] flex items-center justify-center text-white shadow-md shadow-[#D4AF37]/20">
+              <div className="group card-lux p-5 rounded-2xl bg-warm border border-[#D4AF37]/25 space-y-2.5">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#B38E22] flex items-center justify-center text-white shadow-md shadow-[#D4AF37]/20 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-rotate-6 group-hover:scale-110">
                   <Award className="w-5 h-5" />
                 </div>
                 <h4 className="font-display font-bold text-sm tracking-wide text-ink">
@@ -129,8 +129,8 @@ export const BrandStory: React.FC = () => {
                 </p>
               </div>
 
-              <div className="p-5 rounded-2xl bg-warm border border-[#D4AF37]/25 shadow-xs space-y-2.5">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#B38E22] flex items-center justify-center text-white shadow-md shadow-[#D4AF37]/20">
+              <div className="group card-lux p-5 rounded-2xl bg-warm border border-[#D4AF37]/25 space-y-2.5">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#B38E22] flex items-center justify-center text-white shadow-md shadow-[#D4AF37]/20 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-rotate-6 group-hover:scale-110">
                   <Layers className="w-5 h-5" />
                 </div>
                 <h4 className="font-display font-bold text-sm tracking-wide text-ink">

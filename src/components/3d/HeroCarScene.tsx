@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { Reflector } from 'three/examples/jsm/objects/Reflector.js';
-import { ChevronLeft, ChevronRight, Lightbulb, MousePointerClick } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Lightbulb, MousePointerClick } from '../ui/Icon';
 import { PAINT_COLORS, PaintColorKey } from './paints';
 import { HERO_VIEWS, CAR_LABEL, CAR_ORDER, CAR_FIRST_INDEX, CAR_VIEW_COUNT, CarKey } from './stages';
 import { BuiltVehicle, createVehicleMaterials } from './vehicleBuilders';

@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
 import { HIDDEN } from '../../data/vehicles';
-import { ChevronRight, Sparkles } from 'lucide-react';
+import { ChevronRight, Sparkles } from '../ui/Icon';
 
 // three.js (the heavy part of the bundle) loads in its own chunk, after the page text is
 // already on screen. The import starts immediately, so nothing is delayed.
@@ -36,7 +36,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       {/* Editorial copy */}
       <div className="relative order-1 z-10 max-w-7xl mx-auto px-6 md:px-12 pt-24 sm:pt-28 md:pt-32 lg:pt-52 xl:pt-60 pb-2 lg:pb-0 pointer-events-none w-full lg:order-none">
         <div className="max-w-xl space-y-3 md:space-y-4">
-          <div className="inline-flex items-center gap-2.5 px-3.5 py-1 rounded-full bg-white/5 backdrop-blur-md border border-[#D4AF37]/40 pointer-events-auto">
+          <div className="inline-flex items-center gap-2.5 px-3.5 py-1 rounded-full bg-black/30 border border-[#D4AF37]/40 pointer-events-auto">
             <span className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse" />
             <span className="text-[10px] font-mono tracking-[0.3em] text-[#E8C858] uppercase font-medium">
               EXCLUSIVE AUTOMOTIVE COLLECTION
@@ -55,7 +55,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           <div className="pt-1 flex flex-wrap items-center gap-3 pointer-events-auto">
             <button
               onClick={onExploreCollection}
-              className="relative group overflow-hidden px-6 py-3 rounded-sm border border-[#D4AF37] bg-gradient-to-r from-[#D4AF37] via-[#FFF0A8] to-[#C29B28] text-[#0E1013] font-sans font-semibold text-[11px] tracking-[0.22em] uppercase transition-all duration-300 shadow-xl shadow-[#D4AF37]/25 hover:shadow-2xl hover:shadow-[#D4AF37]/45 hover:scale-102 flex items-center gap-3"
+              className="btn-shine press group px-6 py-3 rounded-sm border border-[#D4AF37] bg-gradient-to-r from-[#D4AF37] via-[#FFF0A8] to-[#C29B28] text-[#0E1013] font-sans font-semibold text-[11px] tracking-[0.22em] uppercase shadow-xl shadow-[#D4AF37]/25 flex items-center gap-3"
             >
               <Sparkles className="w-3.5 h-3.5 text-[#6B520E]" />
               <span>EXPLORE COLLECTION</span>
@@ -64,7 +64,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
             <button
               onClick={onDiscoverVeltrix}
-              className="group px-6 py-3 rounded-sm bg-white/5 hover:bg-white/10 border border-white/25 hover:border-[#D4AF37] text-white font-sans font-medium text-[11px] tracking-[0.22em] uppercase transition-all duration-300 backdrop-blur-md flex items-center gap-2"
+              className="group press px-6 py-3 rounded-sm bg-black/25 hover:bg-white/10 border border-white/25 hover:border-[#D4AF37] text-white font-sans font-medium text-[11px] tracking-[0.22em] uppercase transition-[background-color,border-color,transform] duration-300 flex items-center gap-2"
             >
               <span>DISCOVER THE GALLERY</span>
             </button>

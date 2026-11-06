@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, CheckCircle2, Calendar, User, Phone, Mail, Car, ArrowRight, Sparkles } from 'lucide-react';
+import { X, CheckCircle2, Calendar, User, Phone, Mail, Car, ArrowRight, Sparkles } from '../ui/Icon';
 import { VEHICLES, HIDDEN } from '../../data/vehicles';
 
 interface PrivateViewingModalProps {
@@ -34,7 +34,7 @@ export const PrivateViewingModal: React.FC<PrivateViewingModalProps> = ({
   };
 
   return (
-    <div data-veltrix-modal="booking" className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 bg-black/60 backdrop-blur-2xl overflow-y-auto">
+    <div data-veltrix-modal="booking" className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 bg-black/80 md:bg-black/60 md:backdrop-blur-xl overflow-y-auto">
       <div
         className="relative w-full max-w-xl bg-paper border-2 border-[#D4AF37]/40 rounded-3xl shadow-[0_25px_80px_rgba(212,175,55,0.25)] overflow-hidden my-auto p-6 md:p-8"
         onClick={(e) => e.stopPropagation()}

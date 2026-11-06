@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HIDDEN } from '../../data/vehicles';
-import { MapPin, Clock, Shield, Sparkles, ArrowUpRight } from 'lucide-react';
+import { MapPin, Clock, Shield, Sparkles, ArrowUpRight } from '../ui/Icon';
 
 interface ShowroomExperienceProps {
   onBookTour: () => void;
@@ -42,7 +42,7 @@ export const ShowroomExperience: React.FC<ShowroomExperienceProps> = ({ onBookTo
   ];
 
   return (
-    <section id="showroom" className="relative py-28 md:py-40 bg-warm text-ink overflow-hidden">
+    <section id="showroom" className="cv-auto relative py-24 md:py-36 bg-warm text-ink overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
         {/* Section Eyebrow & Title */}
         <div className="max-w-3xl mb-16 space-y-4">
@@ -75,12 +75,12 @@ export const ShowroomExperience: React.FC<ShowroomExperienceProps> = ({ onBookTo
 
           {/* Live Dubai Telemetry HUD Overlay */}
           <div className="absolute top-6 left-6 flex flex-wrap items-center gap-3">
-            <div className="px-4 py-2 rounded-xl bg-paper/90 backdrop-blur-md border border-[#D4AF37]/40 flex items-center gap-2 text-xs font-mono text-ink font-semibold shadow-md">
+            <div className="px-4 py-2 rounded-xl bg-paper/95 border border-[#D4AF37]/40 flex items-center gap-2 text-xs font-mono text-ink font-semibold shadow-md">
               <MapPin className="w-3.5 h-3.5 text-gold-mid" />
               <span>25.2048° N, 55.2708° E • DIFC Gate Precinct</span>
             </div>
 
-            <div className="px-4 py-2 rounded-xl bg-paper/90 backdrop-blur-md border border-[#D4AF37]/40 flex items-center gap-2 text-xs font-mono text-gold-deep font-semibold shadow-md">
+            <div className="px-4 py-2 rounded-xl bg-paper/95 border border-[#D4AF37]/40 flex items-center gap-2 text-xs font-mono text-gold-deep font-semibold shadow-md">
               <Clock className="w-3.5 h-3.5 text-[#D4AF37]" />
               <span>Live Dubai GST: {dubaiTime || '10:45:00 AM'}</span>
             </div>
@@ -90,7 +90,7 @@ export const ShowroomExperience: React.FC<ShowroomExperienceProps> = ({ onBookTo
           <div className="absolute bottom-6 right-6 z-10">
             <button
               onClick={onBookTour}
-              className="px-7 py-3.5 rounded-sm border border-[#D4AF37] bg-gradient-to-r from-[#D4AF37] via-[#FFF0A8] to-[#C29B28] text-[#0E1013] font-display font-bold text-xs uppercase tracking-[0.2em] shadow-2xl hover:scale-105 transition-all duration-300 flex items-center gap-2"
+              className="px-7 py-3.5 rounded-sm border border-[#D4AF37] bg-gradient-to-r from-[#D4AF37] via-[#FFF0A8] to-[#C29B28] text-[#0E1013] font-display font-bold text-xs uppercase tracking-[0.2em] shadow-2xl btn-shine press flex items-center gap-2"
             >
               <span>Schedule Private Tour</span>
               <ArrowUpRight className="w-4 h-4 text-ink" />
@@ -103,13 +103,13 @@ export const ShowroomExperience: React.FC<ShowroomExperienceProps> = ({ onBookTo
           {sanctuaryHighlights.map((item, index) => (
             <div
               key={index}
-              className="p-8 rounded-3xl bg-paper border border-[#D4AF37]/25 space-y-4 hover:border-[#D4AF37] shadow-[0_10px_30px_rgba(212,175,55,0.06)] hover:shadow-[0_20px_45px_rgba(212,175,55,0.16)] transition-all duration-300"
+              className="group card-lux p-8 rounded-3xl bg-paper border border-[#D4AF37]/25 space-y-4 shadow-[0_10px_30px_rgba(212,175,55,0.06)]"
             >
               <div className="flex items-center justify-between border-b border-[#D4AF37]/20 pb-4">
                 <span className="text-xs font-mono text-gold-mid font-black tracking-wider">
                   PAVILION ZONE 0{index + 1}
                 </span>
-                <Sparkles className="w-4 h-4 text-[#D4AF37]" />
+                <Sparkles className="w-4 h-4 text-[#D4AF37] transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:rotate-90 group-hover:scale-125" />
               </div>
               <h3 className="font-display font-black text-lg text-ink">
                 {item.title}
@@ -131,7 +131,7 @@ export const ShowroomExperience: React.FC<ShowroomExperienceProps> = ({ onBookTo
           </div>
           <button
             onClick={onBookTour}
-            className="text-xs font-mono uppercase tracking-wider text-gold-mid hover:text-ink transition-colors whitespace-nowrap flex items-center gap-1 font-bold"
+            className="text-xs font-mono uppercase tracking-wider group text-gold-mid hover:text-ink transition-colors whitespace-nowrap flex items-center gap-1 font-bold press"
           >
             <span>Request Protocol Access</span>
             <ArrowUpRight className="w-3.5 h-3.5" />

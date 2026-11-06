@@ -1,16 +1,22 @@
-import React, { useState } from 'react';
+import React, { Suspense, lazy, useState } from 'react';
 import { Navbar } from './components/navigation/Navbar';
 import { HeroSection } from './components/hero/HeroSection';
 import { FeaturedCollection } from './components/collection/FeaturedCollection';
-import { VehicleModal } from './components/collection/VehicleModal';
 import { BrandStory } from './components/brand/BrandStory';
 import { ShowroomExperience } from './components/showroom/ShowroomExperience';
 import { ConciergeServices } from './components/concierge/ConciergeServices';
 import { FinalCta } from './components/cta/FinalCta';
-import { PrivateViewingModal } from './components/modals/PrivateViewingModal';
 import { Footer } from './components/footer/Footer';
 import { Vehicle, CurrencyCode, VEHICLES } from './data/vehicles';
 import { ThemeProvider } from './theme/ThemeContext';
+
+// Modals only load the first time someone opens them — keeps the first page load small.
+const VehicleModal = lazy(() =>
+  import('./components/collection/VehicleModal').then((m) => ({ default: m.VehicleModal }))
+);
+const PrivateViewingModal = lazy(() =>
+  import('./components/modals/PrivateViewingModal').then((m) => ({ default: m.PrivateViewingModal }))
+);
 
 const AppContent: React.FC = () => {
   const [currency, setCurrency] = useState<CurrencyCode>('AED');
@@ -89,24 +95,30 @@ const AppContent: React.FC = () => {
         onOpenBooking={() => handleOpenBookingModal()}
       />
 
-      {/* Vehicle Technical Dossier Modal */}
-      <VehicleModal
-        vehicle={selectedVehicle}
-        currency={currency}
-        onClose={() => setSelectedVehicle(null)}
-        onRequestViewing={(vehicleId) => handleOpenBookingModal(vehicleId)}
-        onNavigateVehicle={handleNavigateVehicle}
-      />
+      <Suspense fallback={null}>
+        {/* Vehicle Technical Dossier Modal */}
+        {selectedVehicle && (
+          <VehicleModal
+            vehicle={selectedVehicle}
+            currency={currency}
+            onClose={() => setSelectedVehicle(null)}
+            onRequestViewing={(vehicleId) => handleOpenBookingModal(vehicleId)}
+            onNavigateVehicle={handleNavigateVehicle}
+          />
+        )}
 
-      {/* Private Viewing Appointment Modal */}
-      <PrivateViewingModal
-        isOpen={bookingModalOpen}
-        preselectedVehicleId={bookingPreselectedVehicleId}
-        onClose={() => {
-          setBookingModalOpen(false);
-          setBookingPreselectedVehicleId(undefined);
-        }}
-      />
+        {/* Private Viewing Appointment Modal */}
+        {bookingModalOpen && (
+          <PrivateViewingModal
+            isOpen={bookingModalOpen}
+            preselectedVehicleId={bookingPreselectedVehicleId}
+            onClose={() => {
+              setBookingModalOpen(false);
+              setBookingPreselectedVehicleId(undefined);
+            }}
+          />
+        )}
+      </Suspense>
     </div>
   );
 };

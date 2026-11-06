@@ -2,7 +2,7 @@ import React from 'react';
 
 /**
  * MANCHESTER AUTO GALLERY — logo lockup (gold winged "M" crest + AUTOGALLERY wordmark).
- * Rendered from /images/logo.webp (transparent background, works on dark and light).
+ * Rendered from /images/logo-sm.webp (transparent background, works on dark and light).
  */
 
 interface MarkProps {
@@ -13,8 +13,8 @@ export const AutogalleryMark: React.FC<MarkProps> = ({ className }) => (
   <img
     src={`${import.meta.env.BASE_URL}images/logo.webp`}
     alt="Manchester Auto Gallery"
-    width={1046}
-    height={443}
+    width={480}
+    height={203}
     decoding="async"
     draggable={false}
     className={className}
