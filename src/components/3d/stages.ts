@@ -1,8 +1,9 @@
-export type CarKey = 'landcruiser' | 'maybach';
+export type CarKey = 'landcruiser' | 'maybach' | 'bmw';
 
 export const CAR_LABEL: Record<CarKey, string> = {
   landcruiser: 'Land Cruiser',
   maybach: 'Mercedes-Maybach',
+  bmw: 'BMW M3 Competition',
 };
 
 export interface HeroView {
@@ -66,25 +67,51 @@ const MAYBACH_VIEWS: Omit<HeroView, 'car'>[] = [
   { name: 'Gallery Plate', category: 'detail', pos: [0.9, 1.15, -4.6], lookAt: [0, 0.9, -2.62], shift: 0.3, fov: 28 },
 ];
 
+/**
+ * The same 13-camera sequence for the BMW M3 Competition (coordinates measured on bmw-m3.glb:
+ * 4.82 m long, 1.46 m high, nose towards +z, wheel centres at z = +1.535 / -1.325, x = ±0.792).
+ */
+const BMW_VIEWS: Omit<HeroView, 'car'>[] = [
+  // Exterior stances
+  { name: 'Front Three-Quarter', category: 'exterior', pos: [5.2, 1.6, 5.8], lookAt: [0, 0.7, 0.1], shift: 0.9 },
+  { name: 'Frontal Presence', category: 'exterior', pos: [0.3, 1.2, 7.6], lookAt: [0, 0.75, 0], shift: 0.9 },
+  { name: 'Pure Profile', category: 'exterior', pos: [8.4, 1.25, 0.1], lookAt: [0, 0.72, 0], shift: 0.9 },
+  { name: 'Rear Three-Quarter', category: 'exterior', pos: [-5.6, 1.6, -5.6], lookAt: [0, 0.7, 0], shift: 0.9 },
+  { name: 'Rear Elevation', category: 'exterior', pos: [0.3, 1.25, -7.9], lookAt: [0, 0.75, 0], shift: 0.9 },
+  // Aerial studies
+  { name: 'Top Plan Study', category: 'exterior', pos: [0.6, 7.4, 3.2], lookAt: [0, 0.55, 0], shift: 0.4 },
+  { name: 'Aerial Front Study', category: 'exterior', pos: [4.4, 4.0, 5.4], lookAt: [0, 0.65, 0], shift: 0.8 },
+  { name: 'Aerial Rear Study', category: 'exterior', pos: [-4.6, 3.8, -5.5], lookAt: [0, 0.65, 0], shift: 0.8 },
+  // Macro detail studies
+  { name: 'Kidney Grille & Roundel', category: 'detail', pos: [1.1, 0.95, 4.4], lookAt: [0, 0.62, 2.4], shift: 0.5, fov: 27 },
+  { name: 'Quad Headlamp', category: 'detail', pos: [2.2, 1.1, 3.7], lookAt: [0.6, 0.68, 2.1], shift: 0.35, fov: 27 },
+  { name: 'Forged M Wheel', category: 'detail', pos: [3.0, 0.6, 3.2], lookAt: [0.79, 0.36, 1.54], shift: 0.35, fov: 30 },
+  { name: 'Tail-Lamp Signature', category: 'detail', pos: [-2.3, 1.3, -3.9], lookAt: [-0.6, 0.8, -2.25], shift: 0.35, fov: 27 },
+  { name: 'Gallery Plate', category: 'detail', pos: [0.9, 1.1, -4.3], lookAt: [0, 0.8, -2.27], shift: 0.3, fov: 28 },
+];
+
 export const LAND_CRUISER_VIEW_COUNT = LAND_CRUISER_VIEWS.length;
 
 /** Land Cruiser first; when its 13 cameras are done the sequence carries on with the Maybach. */
 export const HERO_VIEWS: HeroView[] = [
   ...LAND_CRUISER_VIEWS.map((v): HeroView => ({ ...v, car: 'landcruiser' })),
   ...MAYBACH_VIEWS.map((v): HeroView => ({ ...v, car: 'maybach' })),
+  ...BMW_VIEWS.map((v): HeroView => ({ ...v, car: 'bmw' })),
 ];
 
 /** The slider arrows walk through the cars in this order; clicking the screen walks one car's views. */
-export const CAR_ORDER: CarKey[] = ['landcruiser', 'maybach'];
+export const CAR_ORDER: CarKey[] = ['landcruiser', 'maybach', 'bmw'];
 
 /** index of each car's first camera inside HERO_VIEWS */
 export const CAR_FIRST_INDEX: Record<CarKey, number> = {
   landcruiser: 0,
   maybach: LAND_CRUISER_VIEW_COUNT,
+  bmw: LAND_CRUISER_VIEW_COUNT + MAYBACH_VIEWS.length,
 };
 
 /** how many cameras each car has */
 export const CAR_VIEW_COUNT: Record<CarKey, number> = {
   landcruiser: LAND_CRUISER_VIEW_COUNT,
   maybach: MAYBACH_VIEWS.length,
+  bmw: BMW_VIEWS.length,
 };

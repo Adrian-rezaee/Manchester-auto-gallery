@@ -32,6 +32,8 @@ export interface CarLightLayout {
   lampGain?: number;
   /** the headlamp's LED points, inner -> outer, right-hand lamp (mirrored for the left): drawn as a light strip with glowing dots */
   ledDots?: [number, number, number][];
+  /** with ledDots: draw ONLY a soft glow around each point (no strip, no dots) */
+  glowOnly?: boolean;
 }
 
 export const LAND_CRUISER_LIGHTS: CarLightLayout = {
@@ -54,6 +56,24 @@ export const MAYBACH_LIGHTS: CarLightLayout = {
     [0.785, 0.741, 2.355],
     [0.886, 0.752, 2.226],
   ],
+};
+
+// BMW M3 Competition: front lamp strip x ±0.82, y 0.61-0.73, z 1.98-2.19 (measured on bmw-m3.glb)
+export const BMW_M3_LIGHTS: CarLightLayout = {
+  head: [0.62, 0.66, 2.3],
+  headTarget: [0.42, 0, 8],
+  tail: [0.7, 0.88, -2.6],
+  // dark mode = blue headlamps: the lamp's own lens elements glow blue, with a soft halo around them
+  beamColor: 0x9cc4ff,
+  lampColor: 0x2f8cff,
+  lampGain: 4.5,
+  // centres of the three lens elements (measured on bmw-m3.glb, right-hand lamp; mirrored for the left)
+  ledDots: [
+    [0.528, 0.623, 2.18],
+    [0.662, 0.663, 2.112],
+    [0.793, 0.68, 2.016],
+  ],
+  glowOnly: true,
 };
 
 export interface CarLightMaterials {
@@ -92,7 +112,7 @@ function glowTexture(): THREE.CanvasTexture {
   return t;
 }
 
-function buildSignature(dotsRight: [number, number, number][]): Signature | null {
+function buildSignature(dotsRight: [number, number, number][], glowOnly = false): Signature | null {
   if (dotsRight.length < 3) return null;
   const group = new THREE.Group();
   const flat = { transparent: true, opacity: 0, toneMapped: false, depthWrite: false, depthTest: false } as const;
@@ -101,7 +121,7 @@ function buildSignature(dotsRight: [number, number, number][]): Signature | null
   const dots = new THREE.MeshBasicMaterial({ color: 0xffffff, ...flat });
   const tex = glowTexture();
   const bigGlow = new THREE.SpriteMaterial({ map: tex, color: 0x2f7fff, ...flat, blending: THREE.AdditiveBlending });
-  const dotGlow = new THREE.SpriteMaterial({ map: tex, color: 0xa6ceff, ...flat, blending: THREE.AdditiveBlending });
+  const dotGlow = new THREE.SpriteMaterial({ map: tex, color: glowOnly ? 0x2f86ff : 0xa6ceff, ...flat, blending: THREE.AdditiveBlending });
   const geos: THREE.BufferGeometry[] = [];
   const sides: { side: number; group: THREE.Group }[] = [];
   const FRONT = 0.008; // lift everything just in front of the lens
@@ -111,6 +131,17 @@ function buildSignature(dotsRight: [number, number, number][]): Signature | null
     sides.push({ side, group: sg });
     group.add(sg);
     const d = dotsRight.map(([x, y, z]) => new THREE.Vector3(x * side, y, z + FRONT));
+    if (glowOnly) {
+      // soft blue halo around each lens element only
+      const sizes = [0.14, 0.26, 0.2];
+      d.forEach((c, i) => {
+        const sp = new THREE.Sprite(dotGlow);
+        sp.position.copy(c);
+        sp.scale.setScalar(sizes[i] ?? 0.18);
+        sg.add(sp);
+      });
+      continue;
+    }
     // the strip runs through the three LED points and a little beyond both ends
     const first = d[0].clone().addScaledVector(d[1].clone().sub(d[0]), -0.55);
     const last = d[d.length - 1].clone().addScaledVector(d[d.length - 1].clone().sub(d[d.length - 2]), 0.55);
@@ -271,11 +302,13 @@ export function createCarLights(
     lampGain = l.lampGain ?? 1;
     if (curLamp && l.lampColor !== undefined) {
       curLamp.emissive.set(l.lampColor);
+      curLamp.toneMapped = false;
+      curLamp.needsUpdate = true; // keep the emissive vivid instead of being squashed by tone mapping
       curLamp.color.set(0x050d1c); // dark lens body, so the blue light reads as light and not as grey plastic
     }
     curDots = l.ledDots ?? null;
     if (l.ledDots) {
-      if (!sigCache.has(l)) sigCache.set(l, buildSignature(l.ledDots));
+      if (!sigCache.has(l)) sigCache.set(l, buildSignature(l.ledDots, !!l.glowOnly));
       sig = sigCache.get(l) ?? null;
       if (sig) group.add(sig.group);
     }

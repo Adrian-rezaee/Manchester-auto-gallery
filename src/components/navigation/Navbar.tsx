@@ -90,10 +90,11 @@ export const Navbar: React.FC<NavbarProps> = ({
           }`}
         >
           {/* Logo */}
-          <a href="#" className="group flex items-center focus:outline-none rounded-full" aria-label="Manchester Auto Gallery">
+          <a href="#" className="group flex items-center focus:outline-none rounded-full" aria-label="TAK">
             <AutogalleryMark
-              className={`w-auto drop-shadow-[0_2px_10px_rgba(212,175,55,0.35)] group-hover:scale-105 transition-all duration-500 ${
-                isScrolled ? 'h-9 sm:h-11' : 'h-11 sm:h-14'
+              onDark={!isScrolled}
+              className={`w-auto group-hover:scale-105 transition-all duration-500 ${
+                isScrolled ? 'h-7 sm:h-9' : 'h-8 sm:h-11'
               }`}
             />
           </a>

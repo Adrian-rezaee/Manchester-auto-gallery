@@ -8,14 +8,22 @@ import { HERO_VIEWS, CAR_LABEL, CAR_ORDER, CAR_FIRST_INDEX, CAR_VIEW_COUNT, CarK
 import { BuiltVehicle, createVehicleMaterials } from './vehicleBuilders';
 import { loadLandCruiser } from './loadLandCruiser';
 import { loadMaybach } from './loadMaybach';
+import { loadBmwM3 } from './loadBmwM3';
 import {
   createCarLights,
   CarLights,
   CarLightLayout,
   LAND_CRUISER_LIGHTS,
   MAYBACH_LIGHTS,
+  BMW_M3_LIGHTS,
 } from './carLights';
-import { createRearPlate, RearPlate, MAYBACH_PLATE } from './rearPlate';
+import {
+  createRearPlate,
+  RearPlate,
+  MAYBACH_PLATE,
+  BMW_M3_PLATE,
+  BMW_M3_FRONT_PLATE,
+} from './rearPlate';
 import { createEngineSound, EngineSound } from './engineAudio';
 import { createShowroomBackdrop, ROOM_W, ROOM_D, ROOM_CZ } from './showroomBackdrop';
 import { useTheme } from '../../theme/ThemeContext';
@@ -340,6 +348,7 @@ export const HeroCarScene: React.FC = () => {
           root.add(model);
           // Maybachs parked along the glass too (shown only while the Maybach is the hero car)
           if (!isMobile) backdrop.addDisplayCars('maybach', model, paint);
+          // Maybach: rear plate only (no front plate)
           const plate = createRearPlate(aniso, MAYBACH_PLATE);
           root.add(plate.group);
           vehicle.group.add(root);
@@ -356,6 +365,46 @@ export const HeroCarScene: React.FC = () => {
         });
     };
 
+    let bmwRequested = false;
+    const requestBmw = () => {
+      if (bmwRequested) return;
+      bmwRequested = true;
+      loadBmwM3(mats, aniso)
+        .then(({ model, lamp, lampRed, paint }) => {
+          if (disposed) return;
+          const root = new THREE.Group();
+          root.name = 'BmwM3Root';
+          root.add(model);
+          // BMWs parked along the glass too (shown only while the BMW is the hero car)
+          if (!isMobile) backdrop.addDisplayCars('bmw', model, paint);
+          const rearPlate = createRearPlate(aniso, BMW_M3_PLATE);
+          const frontPlate = createRearPlate(aniso, BMW_M3_FRONT_PLATE);
+          root.add(rearPlate.group, frontPlate.group);
+          const plate: RearPlate = {
+            group: rearPlate.group,
+            dispose: () => {
+              rearPlate.dispose();
+              frontPlate.dispose();
+            },
+          };
+          vehicle.group.add(root);
+          carEntries.bmw = { root, lamp, lampRed, layout: BMW_M3_LIGHTS, plate };
+          // compile its shaders now (while hidden from view) so the swap does not hitch
+          root.visible = true;
+          renderer.compileAsync(scene, camera).catch(() => undefined);
+          root.visible = false;
+          syncCar();
+        })
+        .catch((err) => {
+          bmwRequested = false;
+          console.error('BMW M3 GLB load failed', err);
+        });
+    };
+    const requestCar = (key: CarKey) => {
+      if (key === 'maybach') requestMaybach();
+      else if (key === 'bmw') requestBmw();
+    };
+
     // ---- car-to-car transition: the old car drives out, the new one sweeps in with a spin ----
     const SLIDE = 17;
     const trans = { phase: 'idle' as 'idle' | 'out' | 'in', t: 0, dir: 1 as 1 | -1, next: wantedCar };
@@ -370,14 +419,18 @@ export const HeroCarScene: React.FC = () => {
         trans.t = 0;
         trans.dir = dir;
         trans.next = next;
-        if (next === 'maybach') requestMaybach();
+        requestCar(next);
         setSwitching(true);
         setSweep({ key: ++swapCounter, dir, car: next });
       },
-      preload: requestMaybach,
+      preload: () => {
+        requestMaybach();
+        requestBmw();
+      },
     };
     // fetch the Maybach quietly in the background so the first swap is instant
     const preloadTimer = window.setTimeout(requestMaybach, 2500);
+    const preloadTimerBmw = window.setTimeout(requestBmw, 5000);
 
     loadLandCruiser(mats, aniso)
       .then(({ model, lamp, lampRed }) => {
@@ -396,7 +449,7 @@ export const HeroCarScene: React.FC = () => {
         root.add(plate.group);
         carEntries.landcruiser = { root, lamp, lampRed: lampRed ? [lampRed] : [], layout: LAND_CRUISER_LIGHTS, plate };
         syncCar();
-        if (wantedCar === 'maybach') requestMaybach();
+        requestCar(wantedCar);
       })
       .catch((err) => console.error('GLB load failed', err));
 
@@ -609,6 +662,7 @@ export const HeroCarScene: React.FC = () => {
     return () => {
       disposed = true;
       window.clearTimeout(preloadTimer);
+      window.clearTimeout(preloadTimerBmw);
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(raf);
       observer.disconnect();
@@ -829,7 +883,7 @@ export const HeroCarScene: React.FC = () => {
           <button
             onClick={toggleLights}
             aria-pressed={lightsOn}
-            title={lightsOn ? 'Turn the lights off' : 'Turn the lights on'}
+            title={lightsOn ? 'Stop the engine' : 'Start the engine'}
             className={`flex items-center gap-2 pl-3 pr-4 py-2 rounded-full text-[10px] font-display font-bold uppercase tracking-[0.18em] transition-all duration-300 ${
               lightsOn
                 ? 'bg-gradient-to-r from-[#D4AF37] to-[#E8C858] text-[#0E1013] shadow-[0_0_20px_rgba(232,200,88,0.55)]'
@@ -837,7 +891,7 @@ export const HeroCarScene: React.FC = () => {
             }`}
           >
             <Lightbulb className={`w-4 h-4 ${lightsOn ? 'fill-[#0E1013]/20' : ''}`} />
-            <span>{lightsOn ? 'Lights on' : 'Lights'}</span>
+            <span>Start</span>
           </button>
         </div>
 
