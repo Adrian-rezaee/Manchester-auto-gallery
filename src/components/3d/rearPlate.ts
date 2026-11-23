@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 /**
- * Rear number plate carrying the Manchester Auto Gallery logo.
+ * Rear number plate carrying the TAK logo.
  *
  * Coordinates are in the normalised car frame (floor y = 0, nose towards +z), the same frame
  * used by loadLandCruiser / carLights. The numbers below were measured by ray-casting the
@@ -15,8 +15,12 @@ export interface PlateSpec {
   h: number;
   /** centre of the plate on the tailgate */
   point: THREE.Vector3;
-  /** outward normal of the tailgate panel */
+  /** outward normal of the panel the plate sits on (+z = front of the car, -z = rear) */
   normal: THREE.Vector3;
+  /** curvature of the panel across its width: the plate's edges are pulled back by bend * x² (metres) */
+  bend?: number;
+  /** faint self-illumination of the plate face (0 = none) so the logo stays readable when the showroom goes dark */
+  glow?: number;
 }
 const PLATE_DEPTH = 0.008;
 const RADIUS = 0.014;
@@ -38,6 +42,27 @@ export const MAYBACH_PLATE: PlateSpec = {
   point: new THREE.Vector3(0, 0.85, -2.622),
   normal: new THREE.Vector3(0, 0.04, -1).normalize(),
 };
+
+// BMW M3: the boot lid is almost vertical, the plate recess sits at z ≈ -2.27, y 0.75 … 0.86, x ± 0.26
+export const BMW_M3_PLATE: PlateSpec = {
+  w: 0.5,
+  h: 0.11,
+  point: new THREE.Vector3(0, 0.805, -2.278),
+  normal: new THREE.Vector3(0, 0.03, -1).normalize(),
+};
+
+// ---- FRONT plate (same logo plate, on the nose of the BMW; the Maybach and the Land Cruiser have none) ----
+
+// BMW M3: the model's own front plate recess — x ±0.259, y 0.407 … 0.519, surface z ≈ 2.40, leaning
+// slightly back at the top. Made a hair larger than the model's white plate so it fully covers it.
+export const BMW_M3_FRONT_PLATE: PlateSpec = {
+  w: 0.526,
+  h: 0.118,
+  point: new THREE.Vector3(0, 0.463, 2.402),
+  normal: new THREE.Vector3(0, -0.1, 1).normalize(),
+  glow: 0.3,
+};
+
 
 const GOLD_LIGHT = '#F1D77A';
 const GOLD = '#D4AF37';
@@ -165,6 +190,15 @@ export function createRearPlate(maxAnisotropy = 1, spec: PlateSpec = LAND_CRUISE
     uv.setXY(i, (pos.getX(i) - bb.min.x) / (bb.max.x - bb.min.x), (pos.getY(i) - bb.min.y) / (bb.max.y - bb.min.y));
   }
   uv.needsUpdate = true;
+  if (spec.bend) {
+    // follow a panel that curves away at its sides
+    for (let i = 0; i < pos.count; i++) {
+      const x = pos.getX(i);
+      pos.setZ(i, pos.getZ(i) - spec.bend * x * x);
+    }
+    pos.needsUpdate = true;
+    geo.computeVertexNormals();
+  }
 
   const faceMat = new THREE.MeshPhysicalMaterial({
     map: texture,
@@ -172,6 +206,7 @@ export function createRearPlate(maxAnisotropy = 1, spec: PlateSpec = LAND_CRUISE
     metalness: 0.15,
     clearcoat: 1,
     clearcoatRoughness: 0.12,
+    ...(spec.glow ? { emissive: new THREE.Color(0xffffff), emissiveMap: texture, emissiveIntensity: spec.glow } : {}),
   });
   const edgeMat = new THREE.MeshStandardMaterial({ color: GOLD, roughness: 0.3, metalness: 1 });
 
@@ -180,12 +215,13 @@ export function createRearPlate(maxAnisotropy = 1, spec: PlateSpec = LAND_CRUISE
   mesh.receiveShadow = true;
 
   const group = new THREE.Group();
-  group.name = 'RearPlate';
+  group.name = SURFACE_NORMAL.z < 0 ? 'RearPlate' : 'FrontPlate';
   group.add(mesh);
-  // Face the plate along the tailgate normal. Seen from behind the car, the plate's local +x
-  // (its right-hand side) must point to world -x, otherwise the text reads mirrored.
+  // Face the plate along the panel normal. Seen from outside the car, the plate's local +x
+  // (its right-hand side) must point to world -x when looking at the rear (normal -z) and to
+  // world +x when looking at the front (normal +z), otherwise the text reads mirrored.
   const zAxis = SURFACE_NORMAL.clone();
-  const xAxis = new THREE.Vector3(-1, 0, 0);
+  const xAxis = new THREE.Vector3(SURFACE_NORMAL.z < 0 ? -1 : 1, 0, 0);
   const yAxis = new THREE.Vector3().crossVectors(zAxis, xAxis).normalize(); // up along the panel
   group.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xAxis, yAxis, zAxis));
   // sunk 3 mm into the panel so it sits flush

@@ -1,6 +1,6 @@
 /**
- * Start-up sound for the "Lights on" button (or dark mode). Every car has its own recording:
- * public/audio/landcruiser-engine.mp3 and public/audio/maybach-engine.mp3.
+ * Start-up sound for the "Start" button (or dark mode). Every car has its own recording:
+ * public/audio/landcruiser-engine.mp3, maybach-engine.mp3 and bmw-engine.mp3.
  *
  * Plays the recording of the car that is on screen once (starter -> engine catching -> exhaust /
  * idle). While it plays, getLoudness() reports how loud the recording is at this exact
@@ -12,10 +12,11 @@
 
 import type { CarKey } from './stages';
 
-/** One start-up recording per car: the Land Cruiser keeps its own, the Maybach has its own. */
+/** One start-up recording per car: each car has its own (Land Cruiser, Maybach, BMW M). */
 const AUDIO_URLS: Record<CarKey, string> = {
   landcruiser: `${import.meta.env.BASE_URL}audio/landcruiser-engine.mp3`,
   maybach: `${import.meta.env.BASE_URL}audio/maybach-engine.mp3`,
+  bmw: `${import.meta.env.BASE_URL}audio/bmw-engine.mp3`,
 };
 
 const PLAY_LEVEL = 0.85; // master volume of the recording
@@ -102,6 +103,7 @@ export function createEngineSound(): EngineSound {
   const loaded: Record<CarKey, Promise<Loaded | null>> = {
     landcruiser: loadClip(AUDIO_URLS.landcruiser),
     maybach: loadClip(AUDIO_URLS.maybach),
+    bmw: loadClip(AUDIO_URLS.bmw),
   };
   let clip: Loaded | null = null; // the clip that is playing right now (drives the light loudness)
 

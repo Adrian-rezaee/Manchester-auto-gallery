@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
 /**
- * MANCHESTER AUTO GALLERY — glass-front showroom backdrop.
+ * TAK showroom — glass-front showroom backdrop.
  *
  * Modelled on the real storefront: floor-to-ceiling glass with slim dark mullions,
  * a glossy black fascia carrying the gold lettering, other cars parked behind the
@@ -10,7 +10,7 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
  * the gold sign keeps glowing.
  *
  * The back wall (z = -11) is the exception: a solid dark feature wall carrying the large
- * gold winged-M logo, so the room reads as a gallery rather than a glass box.
+ * TAK logo, so the room reads as a gallery rather than a glass box.
  */
 
 /* Room footprint (shared with HeroCarScene for the marble floor) */
@@ -22,7 +22,7 @@ const GLASS_H = 4.4;
 const ROOF_H = 6.0;
 const BAND_H = ROOF_H - GLASS_H;
 const SIGN_PX_PER_M = 178;
-const LOGO_ASPECT = 1582 / 677; // public/images/logo-wall.webp
+const LOGO_ASPECT = 1352 / 407; // public/images/logo-wall.webp
 const UP = new THREE.Vector3(0, 1, 0);
 
 const mix = (a: number, b: number, t: number) => a + (b - a) * t;
@@ -62,7 +62,6 @@ function createSignTexture(isMobile: boolean, anisotropy: number) {
   texture.anisotropy = anisotropy;
 
   let logo: HTMLImageElement | null = null;
-  const FONT = `800 92px 'Helvetica Neue', Arial, sans-serif`;
   const TAG_FONT = `700 50px 'Helvetica Neue', Arial, sans-serif`;
 
   const spacedWidth = (text: string, spacing: number) => {
@@ -101,23 +100,20 @@ function createSignTexture(isMobile: boolean, anisotropy: number) {
 
     const midY = DESIGN_H / 2;
     const logoH = 170;
-    const logoW = logoH * (1046 / 443);
-    const title = 'MANCHESTER AUTO GALLERY';
+    const logoW = logoH * LOGO_ASPECT;
     const tag = 'Buy  |  Sell  |  Trade';
 
     ctx.textBaseline = 'middle';
-    ctx.font = FONT;
-    const titleW = spacedWidth(title, 7);
     ctx.font = TAG_FONT;
     const tagW = spacedWidth(tag, 3);
 
-    const gapA = 70;
-    const gapB = 90;
-    const total = logoW + gapA + titleW + gapB + tagW;
+    // sign = TAK logo + tagline
+    const gapB = 110;
+    const total = logoW + gapB + tagW;
     let x = (DESIGN_W - total) / 2;
 
     if (logo) ctx.drawImage(logo, x, midY - logoH / 2, logoW, logoH);
-    x += logoW + gapA;
+    x += logoW + gapB;
 
     const gold = (size: number) => {
       const g = ctx.createLinearGradient(0, midY - size * 0.5, 0, midY + size * 0.5);
@@ -130,11 +126,6 @@ function createSignTexture(isMobile: boolean, anisotropy: number) {
 
     ctx.shadowColor = 'rgba(232,200,88,0.45)';
     ctx.shadowBlur = 22;
-    ctx.font = FONT;
-    ctx.fillStyle = gold(92);
-    drawSpaced(title, x, midY + 2, 7);
-    x += titleW + gapB;
-
     ctx.font = TAG_FONT;
     ctx.fillStyle = gold(50);
     drawSpaced(tag, x, midY + 4, 3);
@@ -694,6 +685,13 @@ export function createShowroomBackdrop({ isMobile, maxAnisotropy }: Options): Sh
             { x: 6.4, z: -9.2, yaw: -Math.PI / 2 + 0.1, color: 0xa3101f, metal: 0.5, rough: 0.18 }, // ruby red
             { x: -6.8, z: 10.4, yaw: -Math.PI / 2, color: 0x1740a0, metal: 0.5, rough: 0.18 }, // sapphire blue
             { x: 6.8, z: 10.4, yaw: Math.PI / 2 + 0.06, color: 0xe27a14, metal: 0.5, rough: 0.18 }, // amber orange
+          ]
+        : key === 'bmw'
+        ? [
+            { x: -6.6, z: -9.2, yaw: Math.PI / 2 - 0.08, color: 0x0b3a2c, metal: 0.6, rough: 0.2 }, // Isle of Man green
+            { x: 6.4, z: -9.2, yaw: -Math.PI / 2 + 0.1, color: 0x6d7178, metal: 0.7, rough: 0.22 }, // Brooklyn grey
+            { x: -6.8, z: 10.4, yaw: -Math.PI / 2, color: 0x1c3fa8, metal: 0.6, rough: 0.2 }, // Portimao blue
+            { x: 6.8, z: 10.4, yaw: Math.PI / 2 + 0.06, color: 0xd9b310, metal: 0.6, rough: 0.2 }, // Sao Paulo yellow
           ]
         : [
             { x: -6.6, z: -9.2, yaw: Math.PI / 2 - 0.08, color: 0x101114, metal: 0.6, rough: 0.2 }, // black

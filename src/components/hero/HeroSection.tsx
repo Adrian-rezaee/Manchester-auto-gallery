@@ -20,9 +20,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   return (
     <section className="relative w-full min-h-[100svh] lg:h-screen lg:min-h-[760px] bg-[#08090B] overflow-hidden flex flex-col lg:justify-between">
       {/* 3D studio slider — click left / right to walk the views.
-          Mobile/tablet: sits BELOW the copy in normal flow so text never covers the car.
+          Mobile/tablet: sits at the TOP of the hero (first thing on screen), the copy follows below it
+          in normal flow so text never covers the car.
           Desktop (lg+): full-bleed background behind the copy. */}
-      <div className="relative order-2 flex-1 min-h-[360px] sm:min-h-[420px] z-0 lg:absolute lg:inset-0 lg:order-none lg:min-h-0">
+      <div className="relative order-1 flex-none h-[62svh] min-h-[380px] sm:h-[58svh] sm:min-h-[460px] z-0 lg:absolute lg:inset-0 lg:order-none lg:h-auto lg:min-h-0">
         <div className="absolute inset-0">
           <Suspense fallback={<div className="w-full h-full bg-[#08090B]" />}>
             <HeroCarScene />
@@ -34,7 +35,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       <div className="hidden lg:block absolute inset-0 z-[1] pointer-events-none bg-gradient-to-r from-black/65 via-black/25 to-transparent" />
 
       {/* Editorial copy */}
-      <div className="relative order-1 z-10 max-w-7xl mx-auto px-6 md:px-12 pt-24 sm:pt-28 md:pt-32 lg:pt-52 xl:pt-60 pb-2 lg:pb-0 pointer-events-none w-full lg:order-none">
+      <div className="relative order-2 z-10 max-w-7xl mx-auto px-6 md:px-12 pt-6 sm:pt-8 md:pt-10 lg:pt-52 xl:pt-60 pb-10 sm:pb-12 lg:pb-0 pointer-events-none w-full lg:order-none">
         <div className="max-w-xl space-y-3 md:space-y-4">
           <div className="inline-flex items-center gap-2.5 px-3.5 py-1 rounded-full bg-black/30 border border-[#D4AF37]/40 pointer-events-auto">
             <span className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse" />

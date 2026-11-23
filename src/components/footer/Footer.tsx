@@ -19,7 +19,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenBooking }) => {
           {/* Column 1: Brand & Manifesto */}
           <div className="lg:col-span-5 space-y-6">
             <div className="flex items-center">
-              <AutogalleryMark className="w-[230px] h-auto" />
+              <AutogalleryMark className="w-[220px] h-auto" />
             </div>
 
             <p className="text-sm text-body leading-relaxed max-w-sm">
